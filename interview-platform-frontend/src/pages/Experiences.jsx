@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import experienceApi from '../api/experienceApi'
 import companyApi from '../api/companyApi'
 import ExperienceCard from '../components/experience/ExperienceCard'
