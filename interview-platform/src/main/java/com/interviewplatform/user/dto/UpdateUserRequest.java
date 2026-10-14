@@ -15,6 +15,9 @@ public class UpdateUserRequest {
     @Schema(description = "Updated full name of the user", example = "John Doe Updated")
     private String name;
 
+    @Schema(description = "Mobile/Phone number of the candidate", example = "+91 9876543210")
+    private String phoneNumber;
+
     @Schema(description = "Base64 data URI or image URL for profile photo", example = "data:image/png;base64,...")
     private String profilePhoto;
 }

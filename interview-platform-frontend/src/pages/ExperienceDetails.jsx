@@ -149,6 +149,8 @@ export function ExperienceDetails() {
 
   const isAdmin = Boolean(isAuthenticated && user && user.role === 'ADMIN')
   const canManage = isOwner || isAdmin
+  // Candidates/owners can add rounds; administrators view & moderate but cannot add rounds
+  const canAddRound = isOwner && !isAdmin
 
   
 
@@ -680,7 +682,7 @@ export function ExperienceDetails() {
             </span>
 
             {/* + Add Round Button for Owner/Admin */}
-            {canManage && (
+            {canAddRound && (
               <button
                 type="button"
                 onClick={() => {
@@ -706,7 +708,7 @@ export function ExperienceDetails() {
               title="No Interview Rounds Documented Yet"
               description="The author has not yet added individual round breakdowns or question details for this interview experience."
               action={
-                canManage ? (
+                canAddRound ? (
                   <button
                     type="button"
                     onClick={() => {

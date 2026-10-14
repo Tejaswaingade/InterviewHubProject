@@ -190,9 +190,11 @@ export function Dashboard() {
           </p>
         </div>
 
+        {!isAdmin && (
         <Link to="/create-experience" className="btn btn-primary" id="dashboard-share-btn">
           ➕ Share Your Experience
         </Link>
+      )}
       </div>
 
       {/* STATISTICS CARDS - Clickable, Responsive & Interactive */}
@@ -481,13 +483,15 @@ export function Dashboard() {
               title="You haven't shared an interview experience yet."
               description="Help other developers prepare by documenting your interview rounds, technical questions, and key preparation takeaways."
               action={
-                <Link
-                  to="/create-experience"
-                  className="btn btn-primary"
-                  id="btn-dashboard-share-empty"
-                >
-                  Share Your Experience
-                </Link>
+                !isAdmin ? (
+                  <Link
+                    to="/create-experience"
+                    className="btn btn-primary"
+                    id="btn-dashboard-share-empty"
+                  >
+                    Share Your Experience
+                  </Link>
+                ) : null
               }
             />
           </div>

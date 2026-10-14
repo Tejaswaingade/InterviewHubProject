@@ -88,9 +88,15 @@ export function Home() {
             <Link to="/experiences" className="btn btn-primary btn-lg" id="hero-cta-explore">
               Explore Experiences
             </Link>
-            <Link to="/create-experience" className="btn btn-secondary btn-lg" id="hero-cta-share">
-              Share Your Experience
-            </Link>
+            {hasAdminRole ? (
+              <Link to="/admin" className="btn btn-secondary btn-lg" id="hero-cta-admin">
+                Admin Console
+              </Link>
+            ) : (
+              <Link to="/create-experience" className="btn btn-secondary btn-lg" id="hero-cta-share">
+                Share Your Experience
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -302,11 +308,11 @@ export function Home() {
               icon="📝"
               title="No experiences shared yet"
               description="Be the first candidate to share your technical interview journey!"
-              action={
+              action={!hasAdminRole ? (
                 <Link to="/create-experience" className="btn btn-primary" id="empty-state-share-btn">
                   Share Experience
                 </Link>
-              }
+              ) : null}
             />
           )}
 

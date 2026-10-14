@@ -29,4 +29,7 @@ public class RegisterRequest {
     @Size(min = 8, message = "Password must be at least 8 characters long")
     @Schema(description = "Password (min 8 characters)", example = "password123")
     private String password;
+
+    @Schema(description = "Mobile/Phone number of the candidate", example = "+91 9876543210")
+    private String phoneNumber;
 }

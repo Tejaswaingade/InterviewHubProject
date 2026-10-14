@@ -40,6 +40,9 @@ public class User {
     @Builder.Default
     private Role role = Role.USER;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "profile_photo", columnDefinition = "TEXT")
     private String profilePhoto;
 

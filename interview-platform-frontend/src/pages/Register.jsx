@@ -18,6 +18,7 @@ export function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
   })
@@ -44,6 +45,14 @@ export function Register() {
           return 'Please enter a valid email address'
         }
         return ''
+      case 'phoneNumber':
+        if (value && value.trim()) {
+          const cleaned = value.replace(/[\s\-()]/g, '')
+          if (!/^\+?[0-9]{10,15}$/.test(cleaned)) {
+            return 'Please enter a valid mobile number (10-15 digits, e.g. 9876543210 or +91 9876543210)'
+          }
+        }
+        return ''
       case 'password':
         if (!value) return 'Password is required'
         if (value.length < 8) {
@@ -68,6 +77,9 @@ export function Register() {
 
     const emailErr = validateField('email', formData.email)
     if (emailErr) errors.email = emailErr
+
+    const phoneErr = validateField('phoneNumber', formData.phoneNumber)
+    if (phoneErr) errors.phoneNumber = phoneErr
 
     const passErr = validateField('password', formData.password)
     if (passErr) errors.password = passErr
@@ -111,6 +123,9 @@ export function Register() {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
+      }
+      if (formData.phoneNumber && formData.phoneNumber.trim()) {
+        payload.phoneNumber = formData.phoneNumber.trim()
       }
 
       await register(payload)
@@ -274,6 +289,18 @@ export function Register() {
                   error={validationErrors.email}
                   disabled={isSubmitting}
                   required
+                />
+
+                <Input
+                  label="Mobile Number"
+                  type="tel"
+                  name="phoneNumber"
+                  id="register-phone"
+                  placeholder="e.g. +91 98765 43210 or 9876543210"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  error={validationErrors.phoneNumber}
+                  disabled={isSubmitting}
                 />
 
                 <Input

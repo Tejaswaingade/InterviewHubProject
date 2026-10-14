@@ -19,6 +19,9 @@ public class PatchUserRequest {
     @Schema(description = "Updated email of the user (optional)", example = "john.updated@example.com")
     private String email;
 
+    @Schema(description = "Mobile/Phone number of the candidate (optional)", example = "+91 9876543210")
+    private String phoneNumber;
+
     @Schema(description = "Base64 data URI or image URL for profile photo (optional)", example = "data:image/png;base64,...")
     private String profilePhoto;
 }

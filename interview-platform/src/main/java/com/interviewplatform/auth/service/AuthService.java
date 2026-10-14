@@ -67,6 +67,7 @@ public class AuthService {
                 .name(request.getName().trim())
                 .email(normalizedEmail)
                 .password(encodedPassword)
+                .phoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber().trim() : null)
                 .role(Role.USER)
                 .build();
 
@@ -84,6 +85,9 @@ public class AuthService {
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole())
+                .phoneNumber(savedUser.getPhoneNumber())
+                .profilePhoto(savedUser.getProfilePhoto())
+                .createdAt(savedUser.getCreatedAt())
                 .build();
     }
 
@@ -125,6 +129,9 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .phoneNumber(user.getPhoneNumber())
+                .profilePhoto(user.getProfilePhoto())
+                .createdAt(user.getCreatedAt())
                 .build();
 
         return AuthResponse.builder()
@@ -187,6 +194,9 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .phoneNumber(user.getPhoneNumber())
+                .profilePhoto(user.getProfilePhoto())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

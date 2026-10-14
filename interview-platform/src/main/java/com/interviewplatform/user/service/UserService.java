@@ -55,6 +55,9 @@ public class UserService {
         }
 
         user.setName(request.getName());
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber().trim().isEmpty() ? null : request.getPhoneNumber().trim());
+        }
         if (request.getProfilePhoto() != null) {
             user.setProfilePhoto(request.getProfilePhoto());
         }
@@ -86,6 +89,10 @@ public class UserService {
                 }
                 user.setEmail(trimmedEmail);
             }
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber().trim().isEmpty() ? null : request.getPhoneNumber().trim());
         }
 
         if (request.getProfilePhoto() != null) {
@@ -145,6 +152,7 @@ public class UserService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .phoneNumber(user.getPhoneNumber())
                 .profilePhoto(user.getProfilePhoto())
                 .createdAt(user.getCreatedAt())
                 .build();

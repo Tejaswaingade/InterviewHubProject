@@ -275,15 +275,17 @@ export function CompanyDetails() {
 
           {/* Right: Actions (Share Experience + Admin Delete) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link
-              to="/create-experience"
-              className="btn btn-primary btn-sm"
-              id="btn-share-company-experience"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-            >
-              <span>➕</span>
-              <span>Share Experience</span>
-            </Link>
+            {!isAdmin && (
+              <Link
+                to="/create-experience"
+                className="btn btn-primary btn-sm"
+                id="btn-share-company-experience"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <span>➕</span>
+                <span>Share Experience</span>
+              </Link>
+            )}
 
             {isAdmin && (
               <button
@@ -375,13 +377,15 @@ export function CompanyDetails() {
               title={`No interview experiences for ${brand.name} yet`}
               description={`Be the first engineer to share your interview journey, round breakdown, and questions for ${brand.name}!`}
               action={
-                <Link
-                  to="/create-experience"
-                  className="btn btn-primary btn-sm"
-                  id="btn-be-first-to-share"
-                >
-                  Share Your Experience
-                </Link>
+                !isAdmin ? (
+                  <Link
+                    to="/create-experience"
+                    className="btn btn-primary btn-sm"
+                    id="btn-be-first-to-share"
+                  >
+                    Share Your Experience
+                  </Link>
+                ) : null
               }
             />
           </div>

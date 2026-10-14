@@ -9,6 +9,8 @@ import ErrorMessage from '../components/common/ErrorMessage'
 import EmptyState from '../components/common/EmptyState'
 
 export function Experiences() {
+  const { user, isAdmin } = useAuth()
+  const hasAdminRole = isAdmin || user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN'
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Read URL query parameters
@@ -211,20 +213,22 @@ export function Experiences() {
           </p>
         </div>
 
-        <Link
-          to="/create-experience"
-          className="btn btn-primary"
-          id="btn-create-experience"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <span>✍️</span>
-          <span>Share Your Experience</span>
-        </Link>
+        {!hasAdminRole && (
+          <Link
+            to="/create-experience"
+            className="btn btn-primary"
+            id="btn-create-experience"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span>✍️</span>
+            <span>Share Your Experience</span>
+          </Link>
+        )}
       </div>
 
       {/* Filter and Sort Toolbar */}
@@ -287,11 +291,11 @@ export function Experiences() {
               >
                 Clear Filters
               </button>
-            ) : (
+            ) : !hasAdminRole ? (
               <Link to="/create-experience" className="btn btn-primary" id="btn-empty-create">
                 Share Your Experience
               </Link>
-            )
+            ) : null
           }
         />
       )}
