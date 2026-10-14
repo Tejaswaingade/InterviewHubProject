@@ -1,0 +1,18 @@
+# Secrets & Environments
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Dependencies & Build Artefacts
+node_modules/
+dist/
+target/
+*.log
+
+# IDE & OS Files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

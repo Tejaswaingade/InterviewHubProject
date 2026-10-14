@@ -1,0 +1,39 @@
+# ==============================================================================
+# Development Configuration Profile
+# Convenient settings and verbose logging for local development
+# ==============================================================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:interview_app}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:tejas@2707}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Verbose SQL and ORM logging for development
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG
+
+# JWT Secret with default development fallback
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+
+# Actuator Health - show full details in development
+management:
+  endpoint:
+    health:
+      show-details: always

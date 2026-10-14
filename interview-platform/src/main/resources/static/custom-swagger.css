@@ -1,0 +1,52 @@
+/* Hide 1.0.0 version badge and OAS 3.1 badge */
+.swagger-ui .info .title small.version-stamp,
+.swagger-ui .info small.version-stamp,
+.swagger-ui .info .version,
+.swagger-ui .version-pragma,
+.swagger-ui .version-pragma__message {
+    display: none !important;
+}
+
+/* Hide Servers box, label, and dropdown completely */
+.swagger-ui .schemes-server-container,
+.swagger-ui .servers,
+.swagger-ui .servers-title,
+.swagger-ui .servers-wrapper,
+.swagger-ui .servers-container,
+.swagger-ui .schemes > .servers {
+    display: none !important;
+}
+
+/* Align Authorize button neatly to the right */
+.swagger-ui .scheme-container .schemes {
+    display: flex !important;
+    justify-content: flex-end !important;
+}
+
+/* Hide Media type dropdown (since application/json is standard) */
+.swagger-ui .response-control-media-type,
+.swagger-ui .body-param-options label:has(select) {
+    display: none !important;
+}
+
+/* Hide Schemas section at the bottom of Swagger UI */
+.swagger-ui section.models {
+    display: none !important;
+}
+
+/* Hide Schema tab toggle, keeping only clean Example Value */
+.swagger-ui .tab li:last-of-type,
+.swagger-ui .tab li:first-of-type:after {
+    display: none !important;
+}
+
+/* When live server response is displayed, hide the static documentation table and heading so only ONE response is shown */
+.swagger-ui .responses-inner:has(.live-responses-table) .responses-table:not(.live-responses-table),
+.swagger-ui .responses-inner:has(.live-responses-table) > div > h4:last-child,
+.swagger-ui .opblock-body:has(.live-responses-table) .responses-inner > .responses-table:not(.live-responses-table),
+.swagger-ui .opblock-body:has(.live-responses-table) .responses-inner > div > h4:last-child,
+.swagger-ui .opblock-body:has(.live-responses-table) .responses-inner > .responses-table,
+.swagger-ui .opblock-body:has(.live-responses-table) .responses-inner > h4 {
+    display: none !important;
+}
+
