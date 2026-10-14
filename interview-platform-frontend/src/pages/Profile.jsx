@@ -402,7 +402,7 @@ export function Profile() {
                     padding: '0.4rem 0.75rem',
                   }}
                 >
-                  ✕ Remove Photo
+                  ❌Delete Photo
                 </button>
               )}
             </div>
@@ -446,15 +446,6 @@ export function Profile() {
             </span>
             <div style={{ marginTop: '0.3rem', fontSize: '1.05rem', fontWeight: 700, color: '#3b82f6' }}>
               Tier-1 Verified
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Profile UID
-            </span>
-            <div style={{ marginTop: '0.3rem', fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {profile?.id ? `#UID-${profile.id}` : '#UID-USER'}
             </div>
           </div>
         </div>

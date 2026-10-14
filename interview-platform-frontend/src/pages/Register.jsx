@@ -133,7 +133,7 @@ export function Register() {
       showToast({
         type: 'success',
         title: 'Welcome to InterviewHub! 🎉',
-        message: 'Account created successfully! A welcome confirmation email has been dispatched to your inbox.',
+        message: 'Account created successfully! A welcome confirmation email has been sent to your email.',
       })
 
       // Redirect to /login with success message and prefilled email
@@ -185,8 +185,6 @@ export function Register() {
           {/* Left Column: Platform Highlights & Community Values */}
           <div className="auth-showcase-panel">
             <div className="auth-showcase-badge">
-              <span className="auth-badge-dot"></span>
-              <span>Join 100% Free Forever</span>
             </div>
 
             <h2 className="auth-showcase-title">
@@ -270,7 +268,6 @@ export function Register() {
                   type="text"
                   name="name"
                   id="register-name"
-                  placeholder="e.g. Alex Chen"
                   value={formData.name}
                   onChange={handleChange}
                   error={validationErrors.name}
@@ -283,7 +280,6 @@ export function Register() {
                   type="email"
                   name="email"
                   id="register-email"
-                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   error={validationErrors.email}
@@ -296,7 +292,7 @@ export function Register() {
                   type="tel"
                   name="phoneNumber"
                   id="register-phone"
-                  placeholder="e.g. +91 98765 43210 or 9876543210"
+                  placeholder="+91 "
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   error={validationErrors.phoneNumber}

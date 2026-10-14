@@ -291,8 +291,6 @@ export function Login() {
           {/* Left Column: Platform Highlights & Trust Pillars */}
           <div className="auth-showcase-panel">
             <div className="auth-showcase-badge">
-              <span className="auth-badge-dot"></span>
-              <span>Real Candidate Community</span>
             </div>
 
             <h2 className="auth-showcase-title">
@@ -408,7 +406,6 @@ export function Login() {
                     type="email"
                     name="email"
                     id="login-email"
-                    placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleLoginChange}
                     error={validationErrors.email}
@@ -479,7 +476,6 @@ export function Login() {
                     type="email"
                     name="email"
                     id="reset-request-email"
-                    placeholder="name@example.com"
                     value={resetData.email}
                     onChange={handleResetChange}
                     error={validationErrors.email}
