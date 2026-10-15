@@ -10,7 +10,7 @@ import EmptyState from '../components/common/EmptyState'
 import { getCompanyBrand } from '../utils/companyBrands'
 
 export function Home() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAuthenticated, isAdmin } = useAuth()
   const hasAdminRole = isAdmin || user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN'
   // Popular Companies State
   const [companies, setCompanies] = useState([])
@@ -62,8 +62,12 @@ export function Home() {
 
   useEffect(() => {
     fetchCompanies()
-    fetchExperiences()
-  }, [])
+    if (isAuthenticated) {
+      fetchExperiences()
+    } else {
+      setLoadingExperiences(false)
+    }
+  }, [isAuthenticated])
 
   return (
     <div id="home-page">
@@ -279,61 +283,63 @@ export function Home() {
         </div>
       </section>
 
-      {/* Latest Experiences Section */}
-      <section className="section" id="latest-experiences-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Latest Experiences</h2>
-            <p className="section-subtitle">
-              Fresh candidate insights, round breakdowns, and preparation advice updated daily
-            </p>
-          </div>
+      {/* Latest Experiences Section (Shown Only to Authenticated Candidates) */}
+      {isAuthenticated && (
+        <section className="section" id="latest-experiences-section">
+          <div className="container">
+            <div className="section-header">
+              <h2 className="section-title">Latest Experiences</h2>
+              <p className="section-subtitle">
+                Fresh candidate insights, round breakdowns, and preparation advice updated daily
+              </p>
+            </div>
 
-          {/* Loading State */}
-          {loadingExperiences && (
-            <Loading message="Loading latest interview experiences..." />
-          )}
+            {/* Loading State */}
+            {loadingExperiences && (
+              <Loading message="Loading latest interview experiences..." />
+            )}
 
-          {/* Error State */}
-          {!loadingExperiences && experiencesError && (
-            <ErrorMessage
-              message={experiencesError}
-              onRetry={fetchExperiences}
-            />
-          )}
+            {/* Error State */}
+            {!loadingExperiences && experiencesError && (
+              <ErrorMessage
+                message={experiencesError}
+                onRetry={fetchExperiences}
+              />
+            )}
 
-          {/* Empty State */}
-          {!loadingExperiences && !experiencesError && experiences.length === 0 && (
-            <EmptyState
-              icon="📝"
-              title="No experiences shared yet"
-              description="Be the first candidate to share your technical interview journey!"
-              action={!hasAdminRole ? (
-                <Link to="/create-experience" className="btn btn-primary" id="empty-state-share-btn">
-                  Share Experience
+            {/* Empty State */}
+            {!loadingExperiences && !experiencesError && experiences.length === 0 && (
+              <EmptyState
+                icon="📝"
+                title="No experiences shared yet"
+                description="Be the first candidate to share your technical interview journey!"
+                action={!hasAdminRole ? (
+                  <Link to="/create-experience" className="btn btn-primary" id="empty-state-share-btn">
+                    Share Experience
+                  </Link>
+                ) : null}
+              />
+            )}
+
+            {/* Experiences Grid */}
+            {!loadingExperiences && !experiencesError && experiences.length > 0 && (
+              <div className="grid-cards" id="latest-experiences-grid">
+                {experiences.map((exp) => (
+                  <ExperienceCard key={exp.id} experience={exp} />
+                ))}
+              </div>
+            )}
+
+            {!loadingExperiences && !experiencesError && experiences.length > 0 && (
+              <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                <Link to="/experiences" className="btn btn-secondary" id="btn-browse-all-experiences">
+                  Browse All Experiences →
                 </Link>
-              ) : null}
-            />
-          )}
-
-          {/* Experiences Grid */}
-          {!loadingExperiences && !experiencesError && experiences.length > 0 && (
-            <div className="grid-cards" id="latest-experiences-grid">
-              {experiences.map((exp) => (
-                <ExperienceCard key={exp.id} experience={exp} />
-              ))}
-            </div>
-          )}
-
-          {!loadingExperiences && !experiencesError && experiences.length > 0 && (
-            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-              <Link to="/experiences" className="btn btn-secondary" id="btn-browse-all-experiences">
-                Browse All Experiences →
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Why InterviewHub Section */}
       <section className="section section-light" id="why-interviewhub-section" style={{ padding: "4.5rem 0" }}>

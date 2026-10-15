@@ -280,9 +280,8 @@ export function Chat() {
         {(!isMobile || !activeContact) && (
           <div
             style={{
-              borderRight: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
-              backgroundColor: 'rgba(15, 23, 42, 0.45)',
-              backdropFilter: 'blur(16px)',
+              borderRight: isMobile ? 'none' : '1px solid var(--border-subtle)',
+              backgroundColor: 'var(--bg-subtle)',
               display: 'flex',
               flexDirection: 'column',
               height: '100%',
@@ -290,7 +289,7 @@ export function Chat() {
             id="chat-contacts-sidebar"
           >
             {/* Tabs: Active Chats vs New Chat (Authors) */}
-            <div style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', padding: '0.35rem' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', padding: '0.4rem', gap: '0.35rem' }}>
               <button
                 type="button"
                 onClick={() => setSidebarTab('active')}
@@ -299,11 +298,11 @@ export function Chat() {
                   padding: '0.55rem 0.5rem',
                   fontSize: '0.8rem',
                   fontWeight: 700,
-                  border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  backgroundColor: sidebarTab === 'active' ? 'rgba(99, 102, 241, 0.18)' : 'transparent',
-                  color: sidebarTab === 'active' ? '#818cf8' : 'var(--text-muted)',
+                  border: sidebarTab === 'active' ? '1px solid var(--brand-light-border)' : '1px solid transparent',
+                  backgroundColor: sidebarTab === 'active' ? 'var(--brand-light)' : 'transparent',
+                  color: sidebarTab === 'active' ? 'var(--brand-primary)' : 'var(--text-muted)',
                   transition: 'all 0.15s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -314,7 +313,7 @@ export function Chat() {
               >
                 <span>Active Chats</span>
                 {conversations.length > 0 && (
-                  <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.3)', color: '#c7d2fe' }}>
+                  <span style={{ fontSize: '0.7rem', padding: '1px 7px', borderRadius: '10px', background: sidebarTab === 'active' ? 'var(--brand-primary)' : 'var(--border-medium)', color: '#ffffff', fontWeight: 700 }}>
                     {conversations.length}
                   </span>
                 )}
@@ -328,11 +327,11 @@ export function Chat() {
                   padding: '0.55rem 0.5rem',
                   fontSize: '0.8rem',
                   fontWeight: 700,
-                  border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  backgroundColor: sidebarTab === 'new' ? 'rgba(99, 102, 241, 0.18)' : 'transparent',
-                  color: sidebarTab === 'new' ? '#818cf8' : 'var(--text-muted)',
+                  border: sidebarTab === 'new' ? '1px solid var(--brand-light-border)' : '1px solid transparent',
+                  backgroundColor: sidebarTab === 'new' ? 'var(--brand-light)' : 'transparent',
+                  color: sidebarTab === 'new' ? 'var(--brand-primary)' : 'var(--text-muted)',
                   transition: 'all 0.15s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -343,7 +342,7 @@ export function Chat() {
               >
                 <span>+ New Users</span>
                 {filteredNewUsers.length > 0 && (
-                  <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.25)', color: '#34d399' }}>
+                  <span style={{ fontSize: '0.7rem', padding: '1px 7px', borderRadius: '10px', background: 'var(--color-success, #10b981)', color: '#ffffff', fontWeight: 700 }}>
                     {filteredNewUsers.length}
                   </span>
                 )}
@@ -362,7 +361,6 @@ export function Chat() {
                   width: '100%',
                   padding: '0.45rem 0.75rem',
                   fontSize: '0.85rem',
-                  backgroundColor: 'var(--bg-card)',
                 }}
               />
             </div>
@@ -420,13 +418,14 @@ export function Chat() {
                           gap: '0.75rem',
                           padding: '0.65rem 0.75rem',
                           borderRadius: '10px',
-                          border: 'none',
-                          backgroundColor: isActive ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                          color: isActive ? '#ffffff' : 'var(--text-primary)',
+                          border: isActive ? '1px solid var(--brand-light-border)' : '1px solid transparent',
+                          backgroundColor: isActive ? 'var(--brand-light)' : 'transparent',
+                          color: 'var(--text-primary)',
                           textAlign: 'left',
                           cursor: 'pointer',
-                          transition: 'background-color 0.15s ease',
+                          transition: 'background-color 0.15s ease, border-color 0.15s ease',
                           marginBottom: '0.35rem',
+                          boxShadow: isActive ? 'var(--shadow-xs)' : 'none',
                         }}
                         className="chat-contact-item"
                       >
@@ -436,9 +435,10 @@ export function Chat() {
                             height: '36px',
                             borderRadius: '50%',
                             background: isActive
-                              ? 'linear-gradient(135deg, #6366f1 0%, #38bdf8 100%)'
-                              : 'rgba(255, 255, 255, 0.1)',
-                            color: '#ffffff',
+                              ? 'linear-gradient(135deg, var(--brand-primary) 0%, #38bdf8 100%)'
+                              : 'var(--bg-card)',
+                            border: isActive ? 'none' : '1px solid var(--border-medium)',
+                            color: isActive ? '#ffffff' : 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -451,7 +451,7 @@ export function Chat() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontWeight: isActive ? 700 : 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: isActive ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
                               {conv.contactName}
                             </span>
                             <span style={{ fontSize: '0.685rem', color: 'var(--text-muted)' }}>
@@ -459,7 +459,7 @@ export function Chat() {
                             </span>
                           </div>
                           {conv.contactEmail && (
-                            <div style={{ fontSize: '0.72rem', color: 'var(--brand-primary, #818cf8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--brand-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
                               {conv.contactEmail}
                             </div>
                           )}
@@ -470,7 +470,7 @@ export function Chat() {
                         {conv.unreadCount > 0 && (
                           <span
                             style={{
-                              background: '#10b981',
+                              background: 'var(--color-success, #10b981)',
                               color: '#ffffff',
                               borderRadius: '10px',
                               padding: '1px 6px',
@@ -513,13 +513,14 @@ export function Chat() {
                           gap: '0.75rem',
                           padding: '0.65rem 0.75rem',
                           borderRadius: '10px',
-                          border: 'none',
-                          backgroundColor: isActive ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                          color: isActive ? '#ffffff' : 'var(--text-primary)',
+                          border: isActive ? '1px solid var(--brand-light-border)' : '1px solid transparent',
+                          backgroundColor: isActive ? 'var(--brand-light)' : 'transparent',
+                          color: 'var(--text-primary)',
                           textAlign: 'left',
                           cursor: 'pointer',
-                          transition: 'background-color 0.15s ease',
+                          transition: 'background-color 0.15s ease, border-color 0.15s ease',
                           marginBottom: '0.35rem',
+                          boxShadow: isActive ? 'var(--shadow-xs)' : 'none',
                         }}
                         className="chat-contact-item"
                       >
@@ -530,8 +531,11 @@ export function Chat() {
                             borderRadius: '50%',
                             background: isContributor
                               ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                              : 'linear-gradient(135deg, #6366f1 0%, #38bdf8 100%)',
-                            color: '#ffffff',
+                              : isActive
+                                ? 'linear-gradient(135deg, var(--brand-primary) 0%, #38bdf8 100%)'
+                                : 'var(--bg-card)',
+                            border: isContributor || isActive ? 'none' : '1px solid var(--border-medium)',
+                            color: isContributor || isActive ? '#ffffff' : 'var(--text-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -544,16 +548,17 @@ export function Chat() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontWeight: isActive ? 700 : 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: isActive ? 'var(--brand-primary)' : 'var(--text-primary)' }}>
                               {u.name}
                             </span>
                             <span
                               style={{
                                 fontSize: '0.65rem',
-                                padding: '1px 5px',
+                                padding: '1px 6px',
                                 borderRadius: '4px',
-                                backgroundColor: isContributor ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.2)',
-                                color: isContributor ? '#10b981' : '#818cf8',
+                                backgroundColor: isContributor ? 'var(--color-success-bg, rgba(16, 185, 129, 0.12))' : 'var(--brand-light)',
+                                border: isContributor ? '1px solid var(--color-success-border, rgba(16, 185, 129, 0.3))' : '1px solid var(--brand-light-border)',
+                                color: isContributor ? 'var(--color-success, #059669)' : 'var(--brand-primary)',
                                 fontWeight: 700,
                                 flexShrink: 0,
                               }}
@@ -562,7 +567,7 @@ export function Chat() {
                             </span>
                           </div>
                           {u.email && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--brand-primary, #818cf8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px', fontWeight: 500 }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px', fontWeight: 500 }}>
                               {u.email}
                             </div>
                           )}
@@ -570,7 +575,7 @@ export function Chat() {
                             {isContributor ? 'Interview Experience Contributor' : 'Candidate Peer'}
                           </div>
                         </div>
-                        <span style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: 700, flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700, flexShrink: 0 }}>
                           Chat →
                         </span>
                       </button>
@@ -662,8 +667,8 @@ export function Chat() {
                       gap: '0.35rem',
                       padding: '0.35rem 0.65rem',
                       borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border-subtle)',
                     }}
                     title="Messages are visible only between the two participants"
                   >
@@ -708,17 +713,7 @@ export function Chat() {
                             onClick={() => {
                               setNewMessage(qs)
                             }}
-                            style={{
-                              padding: '0.5rem 0.85rem',
-                              fontSize: '0.8rem',
-                              textAlign: 'left',
-                              borderRadius: 'var(--radius-md, 8px)',
-                              border: '1px solid var(--border-medium)',
-                              backgroundColor: 'var(--bg-card)',
-                              color: 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              transition: 'all 0.15s ease',
-                            }}
+                            className="chat-quick-starter-btn"
                           >
                             "{qs}"
                           </button>
@@ -737,14 +732,11 @@ export function Chat() {
                           }}
                         >
                           <div
+                            className={isSelf ? 'chat-bubble-outgoing' : 'chat-bubble-incoming'}
                             style={{
                               maxWidth: isMobile ? '85%' : '70%',
                               padding: '0.65rem 0.95rem',
                               borderRadius: isSelf ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                              backgroundColor: isSelf ? 'var(--brand-primary)' : 'var(--bg-card)',
-                              color: isSelf ? '#ffffff' : 'var(--text-primary)',
-                              boxShadow: 'var(--shadow-sm)',
-                              border: isSelf ? 'none' : '1px solid var(--border-subtle)',
                             }}
                           >
                             <div style={{ fontSize: '0.875rem', lineHeight: 1.5, wordBreak: 'break-word' }}>
@@ -753,7 +745,7 @@ export function Chat() {
                             <div
                               style={{
                                 fontSize: '0.675rem',
-                                color: isSelf ? 'rgba(255, 255, 255, 0.75)' : 'var(--text-muted)',
+                                color: isSelf ? 'rgba(255, 255, 255, 0.82)' : 'var(--text-muted)',
                                 marginTop: '0.25rem',
                                 textAlign: 'right',
                               }}

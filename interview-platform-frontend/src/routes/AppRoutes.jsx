@@ -27,8 +27,22 @@ export function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/experiences" element={<Experiences />} />
-      <Route path="/experiences/:id" element={<ExperienceDetails />} />
+      <Route
+        path="/experiences"
+        element={
+          <ProtectedRoute>
+            <Experiences />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/experiences/:id"
+        element={
+          <ProtectedRoute>
+            <ExperienceDetails />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/companies" element={<Companies />} />
       <Route path="/companies/:id" element={<CompanyDetails />} />
       <Route path="/playground" element={<Playground />} />

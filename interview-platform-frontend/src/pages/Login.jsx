@@ -45,14 +45,16 @@ export function Login() {
     }
   }, [location.state])
 
-  // When user logs in or is already authenticated, always redirect cleanly to /dashboard
+  // When user logs in or is already authenticated, always redirect cleanly to target or /dashboard
   useEffect(() => {
     if (isAuthenticated && !isSubmitting) {
-      const fromPath = location.state?.from?.pathname
+      const searchParams = new URLSearchParams(location.search)
+      const redirectQuery = searchParams.get('redirect')
+      const fromPath = location.state?.from?.pathname || redirectQuery
       const destination = (fromPath && fromPath !== '/' && fromPath !== '/login') ? fromPath : '/dashboard'
       navigate(destination, { replace: true })
     }
-  }, [isAuthenticated, isSubmitting, location.state, navigate])
+  }, [isAuthenticated, isSubmitting, location.state, location.search, navigate])
 
   const validateField = (field, value, allValues = formData) => {
     switch (field) {
@@ -65,10 +67,14 @@ export function Login() {
       case 'password':
         if (!value) return 'Password is required'
         return ''
-      case 'resetToken':
-        if (!value.trim()) return 'Verification code is required'
-        if (value.trim().length !== 6) return 'Verification code must be 6 digits'
+      case 'resetToken': {
+        const cleaned = value.trim().replace(/^G-?/i, '')
+        if (!cleaned) return 'Verification code is required'
+        if (cleaned.length !== 6 || !/^\d{6}$/.test(cleaned)) {
+          return 'Verification code must be 6 digits (e.g. G-123456 or 123456)'
+        }
         return ''
+      }
       case 'newPassword':
         if (!value) return 'New password is required'
         if (value.length < 8) return 'Password must be at least 8 characters long'
@@ -147,8 +153,10 @@ export function Login() {
         message: 'Successfully logged in to InterviewHub.',
       })
 
-      // Clean redirect to /dashboard upon login
-      const fromPath = location.state?.from?.pathname
+      // Clean redirect to target or /dashboard upon login
+      const searchParams = new URLSearchParams(location.search)
+      const redirectQuery = searchParams.get('redirect')
+      const fromPath = location.state?.from?.pathname || redirectQuery
       const destination = (fromPath && fromPath !== '/' && fromPath !== '/login') ? fromPath : '/dashboard'
       navigate(destination, { replace: true })
     } catch (err) {
@@ -183,10 +191,10 @@ export function Login() {
       showToast({
         type: 'success',
         title: 'Verification Code Sent',
-        message: `A 6-digit password reset code was sent to ${resetData.email}.`,
+        message: `A Google-format verification code (valid for 10 minutes) was sent to ${resetData.email}.`,
       })
 
-      setSuccessMessage(`Verification code dispatched to ${resetData.email}. Enter it below to set your new password.`)
+      setSuccessMessage(`Google-format verification code sent to ${resetData.email} (valid for 10 minutes). Enter it below with your new password.`)
       setAuthMode('reset-confirm')
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Failed to send password reset email. Please try again.'
@@ -223,9 +231,10 @@ export function Login() {
 
     setIsSubmitting(true)
     try {
+      const cleanToken = resetData.resetToken.trim().replace(/^G-?/i, '')
       const payload = {
         email: resetData.email.trim().toLowerCase(),
-        resetToken: resetData.resetToken.trim(),
+        resetToken: cleanToken,
         newPassword: resetData.newPassword,
       }
 
@@ -522,16 +531,17 @@ export function Login() {
               {authMode === 'reset-confirm' && (
                 <form onSubmit={handleConfirmResetPassword} noValidate id="reset-password-confirm-form">
                   <Input
-                    label="6-Digit Verification Code"
+                    label="Verification Code (Google Format)"
                     type="text"
                     name="resetToken"
                     id="reset-confirm-token"
-                    placeholder="e.g. 482910"
+                    placeholder="e.g. G-482910 or 482910"
+                    helperText="Standard Google format (G-XXXXXX or 6 digits), valid for 10 minutes"
                     value={resetData.resetToken}
                     onChange={handleResetChange}
                     error={validationErrors.resetToken}
                     disabled={isSubmitting}
-                    maxLength={6}
+                    maxLength={8}
                     required
                   />
 

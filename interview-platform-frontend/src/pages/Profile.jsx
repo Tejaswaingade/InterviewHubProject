@@ -16,6 +16,7 @@ export function Profile() {
   const [isEditingPhone, setIsEditingPhone] = useState(false)
   const [editedPhone, setEditedPhone] = useState('')
   const [savingPhone, setSavingPhone] = useState(false)
+  const [copiedField, setCopiedField] = useState(null)
   const fileInputRef = useRef(null)
 
   // Initialize avatar & phone from localStorage/profile
@@ -171,10 +172,14 @@ export function Profile() {
     }
   }
 
-  // Quick clipboard copy helper
-  const handleCopy = (text, label) => {
+  // Quick clipboard copy helper with Google-style feedback
+  const handleCopy = (text, label, fieldKey) => {
     if (!text) return
     navigator.clipboard.writeText(text).then(() => {
+      if (fieldKey) {
+        setCopiedField(fieldKey)
+        setTimeout(() => setCopiedField(null), 2000)
+      }
       setSuccessMessage(`${label} copied to clipboard!`)
       setTimeout(() => setSuccessMessage(null), 2500)
     })
@@ -414,7 +419,7 @@ export function Profile() {
           id="profile-stats-bar"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '1rem',
             padding: '1.25rem',
             backgroundColor: 'var(--bg-subtle, rgba(255, 255, 255, 0.03))',
@@ -439,15 +444,6 @@ export function Profile() {
               {isAdmin ? 'Super Admin' : 'Top Contributor'}
             </div>
           </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Security Level
-            </span>
-            <div style={{ marginTop: '0.3rem', fontSize: '1.05rem', fontWeight: 700, color: '#3b82f6' }}>
-              Tier-1 Verified
-            </div>
-          </div>
         </div>
 
         <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: 0 }} />
@@ -465,13 +461,33 @@ export function Profile() {
               </p>
               <button
                 type="button"
-                onClick={() => handleCopy(profile?.email, 'Email address')}
+                onClick={() => handleCopy(profile?.email, 'Email address', 'email')}
                 className="btn btn-ghost btn-sm"
-                title="Copy email"
+                title="Copy email to clipboard"
                 id="btn-copy-email"
-                style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}
+                style={{
+                  padding: '0.2rem 0.45rem',
+                  fontSize: '0.75rem',
+                  color: copiedField === 'email' ? '#10b981' : 'var(--text-muted)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  borderRadius: 'var(--radius-sm, 4px)',
+                  transition: 'all 0.15s ease',
+                }}
               >
-                📋
+                {copiedField === 'email' ? (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Copied</span>
+                  </>
+                ) : (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
@@ -541,13 +557,33 @@ export function Profile() {
                 {profile?.phoneNumber && (
                   <button
                     type="button"
-                    onClick={() => handleCopy(profile.phoneNumber, 'Mobile number')}
+                    onClick={() => handleCopy(profile.phoneNumber, 'Mobile number', 'phone')}
                     className="btn btn-ghost btn-sm"
-                    title="Copy mobile number"
+                    title="Copy mobile number to clipboard"
                     id="btn-copy-phone"
-                    style={{ padding: '0.2rem 0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}
+                    style={{
+                      padding: '0.2rem 0.45rem',
+                      fontSize: '0.75rem',
+                      color: copiedField === 'phone' ? '#10b981' : 'var(--text-muted)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      borderRadius: 'var(--radius-sm, 4px)',
+                      transition: 'all 0.15s ease',
+                    }}
                   >
-                    📋
+                    {copiedField === 'phone' ? (
+                      <>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Copied</span>
+                      </>
+                    ) : (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                      </svg>
+                    )}
                   </button>
                 )}
                 <button
@@ -597,47 +633,7 @@ export function Profile() {
           </div>
         </div>
 
-        {/* Candidate Focus Tags / Tech Stack Pill Row */}
-        <div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.65rem' }}>
-            {isAdmin ? 'Platform Administration Modules' : 'Candidate Target Roles & Focus Domains'}
-          </span>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {isAdmin ? (
-              <>
-                <span className="badge" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)', color: '#c084fc', border: '1px solid rgba(124, 58, 237, 0.25)', fontSize: '0.8rem' }}>
-                  Enterprise Security
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)', color: '#c084fc', border: '1px solid rgba(124, 58, 237, 0.25)', fontSize: '0.8rem' }}>
-                  User Management
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)', color: '#c084fc', border: '1px solid rgba(124, 58, 237, 0.25)', fontSize: '0.8rem' }}>
-                  Content Moderation
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)', color: '#c084fc', border: '1px solid rgba(124, 58, 237, 0.25)', fontSize: '0.8rem' }}>
-                  Company Verification
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#93c5fd', border: '1px solid rgba(59, 130, 246, 0.25)', fontSize: '0.8rem' }}>
-                  Full-Stack Engineering
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#6ee7b7', border: '1px solid rgba(16, 185, 129, 0.25)', fontSize: '0.8rem' }}>
-                  System Design & Scale
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#fcd34d', border: '1px solid rgba(245, 158, 11, 0.25)', fontSize: '0.8rem' }}>
-                  Data Structures & Algorithms
-                </span>
-                <span className="badge" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#c4b5fd', border: '1px solid rgba(139, 92, 246, 0.25)', fontSize: '0.8rem' }}>
-                  Technical Interview Ready
-                </span>
-              </>
-            )}
-          </div>
-        </div>
 
-        <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: 0 }} />
 
         {/* Quick Nav Actions (Notice: Share New Experience is REMOVED for Admin) */}
         <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', paddingTop: '0.25rem' }}>
