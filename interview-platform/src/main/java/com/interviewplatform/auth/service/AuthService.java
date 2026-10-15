@@ -36,6 +36,7 @@ public class AuthService {
     private final CustomUserDetailsService customUserDetailsService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final LoginRateLimiterService loginRateLimiterService;
 
     public AuthService(
             UserRepository userRepository,
@@ -43,7 +44,8 @@ public class AuthService {
             JwtService jwtService,
             CustomUserDetailsService customUserDetailsService,
             AuthenticationManager authenticationManager,
-            EmailService emailService
+            EmailService emailService,
+            LoginRateLimiterService loginRateLimiterService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -51,6 +53,7 @@ public class AuthService {
         this.customUserDetailsService = customUserDetailsService;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.loginRateLimiterService = loginRateLimiterService;
     }
 
     @Transactional
@@ -95,10 +98,21 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         String normalizedEmail = request.getEmail().trim().toLowerCase();
 
-        // Authenticate credentials through Spring Security AuthenticationManager
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(normalizedEmail, request.getPassword())
-        );
+        // 1. Verify brute-force lockout status before attempting authentication
+        loginRateLimiterService.checkLockout(normalizedEmail);
+
+        try {
+            // 2. Authenticate credentials through Spring Security AuthenticationManager
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(normalizedEmail, request.getPassword())
+            );
+        } catch (BadCredentialsException ex) {
+            // Record failed attempt and compute remaining attempts / lock account
+            loginRateLimiterService.recordFailedAttempt(normalizedEmail);
+        }
+
+        // 3. Clear failed login attempts counter on authentication success
+        loginRateLimiterService.resetAttempts(normalizedEmail);
 
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
@@ -148,10 +162,10 @@ public class AuthService {
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("No account registered with email: " + normalizedEmail));
 
-        // Generate 6-digit OTP code
+        // Generate 6-digit OTP code with Google standard 10-minute expiry
         String resetCode = String.format("%06d", new SecureRandom().nextInt(1_000_000));
         user.setResetToken(resetCode);
-        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
         userRepository.save(user);
 
         emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetCode);
@@ -169,7 +183,11 @@ public class AuthService {
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("No account registered with email: " + normalizedEmail));
 
-        if (user.getResetToken() == null || !user.getResetToken().equals(request.getResetToken().trim())) {
+        // Accept code in either numeric "123456" or Google format "G-123456"
+        String rawCode = request.getResetToken() != null ? request.getResetToken().trim() : "";
+        String normalizedCode = rawCode.toUpperCase().replace("G-", "").replace("G", "").trim();
+
+        if (user.getResetToken() == null || !user.getResetToken().equals(normalizedCode)) {
             throw new IllegalArgumentException("Invalid password reset verification code");
         }
 
@@ -177,10 +195,18 @@ public class AuthService {
             throw new IllegalArgumentException("Password reset code has expired. Please request a new code.");
         }
 
+        // Security requirement: New password must NOT be the same as the existing password
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password cannot be the same as your old password. Please choose a different password.");
+        }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
         userRepository.save(user);
+
+        // Clear any lockout state so user can immediately log in with their new password
+        loginRateLimiterService.resetAttempts(normalizedEmail);
     }
 
     public UserResponse getCurrentUser(String email) {

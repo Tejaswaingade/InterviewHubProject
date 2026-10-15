@@ -52,6 +52,9 @@ class AuthServiceTest {
     @Mock
     private com.interviewplatform.mail.service.EmailService emailService;
 
+    @Mock
+    private com.interviewplatform.auth.service.LoginRateLimiterService loginRateLimiterService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -151,11 +154,15 @@ class AuthServiceTest {
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
+        doThrow(new BadCredentialsException("Invalid email or password. You have 4 attempt(s) remaining before account lockout."))
+                .when(loginRateLimiterService).recordFailedAttempt("tejas@example.com");
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(BadCredentialsException.class)
-                .hasMessage("Bad credentials");
+                .hasMessageContaining("remaining before account lockout");
 
+        verify(loginRateLimiterService).checkLockout("tejas@example.com");
+        verify(loginRateLimiterService).recordFailedAttempt("tejas@example.com");
         verify(jwtService, never()).generateToken(any());
     }
 
@@ -224,12 +231,13 @@ class AuthServiceTest {
         sampleUser.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(10));
 
         when(userRepository.findByEmail("tejas@example.com")).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("brandNewPassword123", sampleUser.getPassword())).thenReturn(false);
         when(passwordEncoder.encode("brandNewPassword123")).thenReturn("encodedNewPassword");
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
 
         com.interviewplatform.auth.dto.ResetPasswordRequest request = com.interviewplatform.auth.dto.ResetPasswordRequest.builder()
                 .email("tejas@example.com")
-                .resetToken("123456")
+                .resetToken("G-123456")
                 .newPassword("brandNewPassword123")
                 .build();
 
@@ -238,6 +246,29 @@ class AuthServiceTest {
         assertThat(sampleUser.getPassword()).isEqualTo("encodedNewPassword");
         assertThat(sampleUser.getResetToken()).isNull();
         assertThat(sampleUser.getResetTokenExpiry()).isNull();
+        verify(loginRateLimiterService).resetAttempts("tejas@example.com");
         verify(userRepository).save(sampleUser);
+    }
+
+    @Test
+    @DisplayName("ResetPassword - Same as Old Password: Should throw IllegalArgumentException")
+    void resetPassword_sameAsOldPassword_throwsException() {
+        sampleUser.setResetToken("123456");
+        sampleUser.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(10));
+
+        when(userRepository.findByEmail("tejas@example.com")).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("samePassword123", sampleUser.getPassword())).thenReturn(true);
+
+        com.interviewplatform.auth.dto.ResetPasswordRequest request = com.interviewplatform.auth.dto.ResetPasswordRequest.builder()
+                .email("tejas@example.com")
+                .resetToken("123456")
+                .newPassword("samePassword123")
+                .build();
+
+        assertThatThrownBy(() -> authService.resetPassword(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("New password cannot be the same as your old password. Please choose a different password.");
+
+        verify(userRepository, never()).save(any());
     }
 }

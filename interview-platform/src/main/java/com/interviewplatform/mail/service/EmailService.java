@@ -42,6 +42,9 @@ public class EmailService {
     @Value("${mail.from-name:InterviewHub}")
     private String fromName;
 
+    @Value("${app.client-url:${CORS_CLIENT_URL:http://localhost:5173}}")
+    private String clientUrl;
+
     private final HttpClient httpClient;
 
     public EmailService() {
@@ -56,10 +59,10 @@ public class EmailService {
     @Async
     public void sendPasswordResetEmail(String toEmail, String recipientName, String resetCode) {
         String name = (recipientName != null && !recipientName.isBlank()) ? recipientName.trim() : "Candidate";
-        String subject = "InterviewHub - Verification code (" + resetCode + ")";
+        String subject = "InterviewHub - G-" + resetCode + " is your verification code";
         String htmlContent = buildPasswordResetHtml(name, resetCode, toEmail != null ? toEmail.trim() : "");
 
-        dispatchEmail(toEmail, name, subject, htmlContent, "PASSWORD_RESET", resetCode);
+        dispatchEmail(toEmail, name, subject, htmlContent, "PASSWORD_RESET", "G-" + resetCode);
     }
 
     /**
@@ -276,10 +279,10 @@ public class EmailService {
                   We received a request to reset your password. Use the single-use verification code below to set up your new credentials:
                 </div>
                 <div class="code-box">
-                  <div class="code-digits">{{code}}</div>
+                  <div class="code-digits">G-{{code}}</div>
                 </div>
                 <div class="info-text">
-                  This code will expire in <strong>15 minutes</strong>.
+                  This code will expire in <strong>10 minutes</strong>.
                 </div>
                 <div class="info-text">
                   If you did not make this request, you can safely ignore this email &mdash; your account password remains completely secure.
@@ -303,6 +306,7 @@ public class EmailService {
      * Builds a clean Google-style Welcome Email Template.
      */
     private String buildWelcomeHtml(String name, String toEmail) {
+        String baseUrl = (clientUrl != null && !clientUrl.isBlank()) ? clientUrl.trim().replaceAll("/+$", "") : "http://localhost:5173";
         return """
             <!DOCTYPE html>
             <html lang="en">
@@ -347,7 +351,7 @@ public class EmailService {
                   </div>
                 </div>
                 <div class="cta-row">
-                  <a href="http://localhost:5173/experiences" class="btn-primary">Explore Experiences</a>
+                  <a href="{{clientUrl}}/login?redirect=/experiences" class="btn-primary">Explore Experiences</a>
                 </div>
                 <div class="footer">
                   This email was sent to <strong>{{toEmail}}</strong> because you registered for InterviewHub.<br>
@@ -357,13 +361,15 @@ public class EmailService {
             </body>
             </html>
             """.replace("{{name}}", name)
-               .replace("{{toEmail}}", toEmail);
+               .replace("{{toEmail}}", toEmail)
+               .replace("{{clientUrl}}", baseUrl);
     }
 
     /**
      * Builds a clean Google-style Security Alert / Login Notification Email Template.
      */
     private String buildLoginAlertHtml(String name, String timeStr, String toEmail) {
+        String baseUrl = (clientUrl != null && !clientUrl.isBlank()) ? clientUrl.trim().replaceAll("/+$", "") : "http://localhost:5173";
         return """
             <!DOCTYPE html>
             <html lang="en">
@@ -406,7 +412,7 @@ public class EmailService {
                   If this was you, you can safely disregard this message. If you did not sign in at this time, please reset your password immediately to secure your account.
                 </div>
                 <div class="cta-row">
-                  <a href="http://localhost:5173/login" class="btn-primary">Check Activity</a>
+                  <a href="{{clientUrl}}/login" class="btn-primary">Check Activity</a>
                 </div>
                 <div class="footer">
                   This email was sent to <strong>{{toEmail}}</strong> to notify you of recent security activity.<br>
@@ -417,6 +423,7 @@ public class EmailService {
             </html>
             """.replace("{{name}}", name)
                .replace("{{time}}", timeStr)
-               .replace("{{toEmail}}", toEmail);
+               .replace("{{toEmail}}", toEmail)
+               .replace("{{clientUrl}}", baseUrl);
     }
 }
