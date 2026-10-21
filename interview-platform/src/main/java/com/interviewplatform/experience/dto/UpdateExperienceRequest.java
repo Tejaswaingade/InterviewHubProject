@@ -35,4 +35,12 @@ public class UpdateExperienceRequest {
 
     @PositiveOrZero(message = "Years of experience must be zero or positive")
     private Double yearsOfExperience;
+
+    private Double baseSalary;
+    private Double stockGrant;
+    private Double signingBonus;
+    private Double totalCompensation;
+    private String currency;
+    private String jobLevel;
+    private Boolean offerAccepted;
 }

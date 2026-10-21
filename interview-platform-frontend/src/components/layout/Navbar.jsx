@@ -114,9 +114,40 @@ export function Navbar() {
             Companies
           </NavLink>
 
+          <NavLink
+            to="/mock-interview"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+            id="nav-link-mock-interview"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <span>🤖</span>
+            <span>AI Mock</span>
+          </NavLink>
+          <NavLink
+            to="/playground"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+            id="nav-link-playground"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <span>⚡</span>
+            <span>Playground</span>
+          </NavLink>
+
           {/* Candidate-only links (Hidden for Admin accounts) */}
           {isAuthenticated && !hasAdminRole && (
             <>
+              <NavLink
+                to="/roadmap"
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+                id="nav-link-roadmap"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+              >
+                <span>🎯</span>
+                <span>Prep List</span>
+              </NavLink>
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}

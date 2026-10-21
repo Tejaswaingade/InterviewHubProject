@@ -45,4 +45,30 @@ public class CreateExperienceRequest {
     @PositiveOrZero(message = "Years of experience must be zero or positive")
     @Schema(description = "Years of candidate work experience", example = "2.5")
     private Double yearsOfExperience;
+
+    // --- Optional Offer & Compensation Insights ---
+    @PositiveOrZero(message = "Base salary must be positive")
+    @Schema(description = "Annual base salary", example = "2400000.0")
+    private Double baseSalary;
+
+    @PositiveOrZero(message = "Stock grant must be positive")
+    @Schema(description = "Stock grant / ESOP value", example = "1000000.0")
+    private Double stockGrant;
+
+    @PositiveOrZero(message = "Signing bonus must be positive")
+    @Schema(description = "One-time signing bonus", example = "200000.0")
+    private Double signingBonus;
+
+    @PositiveOrZero(message = "Total compensation must be positive")
+    @Schema(description = "Total annual compensation / CTC", example = "3600000.0")
+    private Double totalCompensation;
+
+    @Schema(description = "Currency of compensation (e.g. INR, USD, EUR)", example = "INR")
+    private String currency;
+
+    @Schema(description = "Job level / seniority tier", example = "SDE-2 / L4")
+    private String jobLevel;
+
+    @Schema(description = "Whether the candidate accepted the offer", example = "true")
+    private Boolean offerAccepted;
 }

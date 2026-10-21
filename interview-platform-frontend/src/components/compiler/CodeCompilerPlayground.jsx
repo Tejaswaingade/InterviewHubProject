@@ -32,6 +32,9 @@ export function CodeCompilerPlayground({
   const [forkedToast, setForkedToast] = useState(false)
   const [autoDetectedNotification, setAutoDetectedNotification] = useState(null)
   const [activeTab, setActiveTab] = useState('console')
+  const [runnerEngine, setRunnerEngine] = useState('auto')
+  const [stdinInput, setStdinInput] = useState('')
+  const [showStdinDrawer, setShowStdinDrawer] = useState(false)
 
   const [testCases, setTestCases] = useState(
     DEFAULT_TEST_CASES[initialLanguage] || []
@@ -144,12 +147,14 @@ export function CodeCompilerPlayground({
     setIsRunning(true)
     setActiveTab('console')
     try {
-      const result = await executeCode(targetLang, code)
+      const result = await executeCode(targetLang, code, stdinInput, runnerEngine)
       setOutput(result.output)
       setExecutionStats({
         timeMs: result.executionTimeMs,
         success: result.success,
         memoryMb: result.memoryMb || '14.2 MB',
+        memoryKb: result.memoryKb || 14200,
+        runner: result.runner || (runnerEngine === 'judge0' ? 'Judge0 Cloud Engine' : 'Sandboxed Engine'),
         exitCode: result.exitCode ?? (result.success ? 0 : 1),
         detectedLang: result.detectedLang || targetLang,
       })
@@ -169,7 +174,7 @@ export function CodeCompilerPlayground({
       }
     } catch (err) {
       setOutput(`[Execution Exception]: ${err.message}`)
-      setExecutionStats({ timeMs: 0, success: false, memoryMb: '0 MB', exitCode: 1, detectedLang: targetLang })
+      setExecutionStats({ timeMs: 0, success: false, memoryMb: '0 MB', memoryKb: 0, exitCode: 1, runner: 'Engine Error', detectedLang: targetLang })
     } finally {
       setIsRunning(false)
     }
@@ -421,6 +426,31 @@ export function CodeCompilerPlayground({
             </select>
           </div>
 
+          {/* Engine Runner Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <select
+              id="compiler-engine-dropdown"
+              value={runnerEngine}
+              onChange={(e) => setRunnerEngine(e.target.value)}
+              aria-label="Select Cloud Compiler Engine"
+              style={{
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                borderRadius: '6px',
+                backgroundColor: isDark ? '#050914' : '#ffffff',
+                color: themeColors.textPrimary,
+                border: `1px solid ${themeColors.border}`,
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="auto">⚡ Auto Engine</option>
+              <option value="judge0">🌐 Judge0 Cloud API</option>
+              <option value="sandbox">💻 Browser Sandbox</option>
+            </select>
+          </div>
+
           {/* Dark / Light Mode Switch Toggle */}
           <button
             type="button"
@@ -575,6 +605,50 @@ export function CodeCompilerPlayground({
         />
       </div>
 
+      {/* Expandable Standard Input (stdin) Drawer */}
+      {showStdinDrawer && (
+        <div
+          style={{
+            padding: '0.75rem 1.25rem',
+            backgroundColor: themeColors.headerBg,
+            borderTop: `1px solid ${themeColors.border}`,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: themeColors.textPrimary }}>
+              Standard Input (stdin) - Passed to Scanner, cin, sys.stdin, or Judge0 API:
+            </span>
+            {stdinInput && (
+              <button
+                type="button"
+                onClick={() => setStdinInput('')}
+                style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: themeColors.textMuted, cursor: 'pointer' }}
+              >
+                Clear Input
+              </button>
+            )}
+          </div>
+          <textarea
+            value={stdinInput}
+            onChange={(e) => setStdinInput(e.target.value)}
+            id="compiler-stdin-input"
+            rows={2}
+            placeholder="Enter custom input values (e.g. 5\n1 2 3 4 5)..."
+            style={{
+              width: '100%',
+              padding: '0.5rem 0.75rem',
+              fontFamily: "'JetBrains Mono', Consolas, monospace",
+              fontSize: '0.85rem',
+              borderRadius: '6px',
+              backgroundColor: themeColors.editorBg,
+              color: themeColors.editorText,
+              border: `1px solid ${themeColors.border}`,
+              resize: 'vertical',
+            }}
+          />
+        </div>
+      )}
+
       {/* Action Bar */}
       <div
         style={{
@@ -620,14 +694,51 @@ export function CodeCompilerPlayground({
                   color: themeColors.textMuted,
                   border: `1px solid ${themeColors.border}`,
                 }}
+                title={executionStats.memoryKb ? `${executionStats.memoryKb} KB` : undefined}
               >
-                📦 {executionStats.memoryMb}
+                📦 {executionStats.memoryMb} {executionStats.memoryKb ? `(${executionStats.memoryKb} KB)` : ''}
               </span>
+              {executionStats.runner && (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                    color: '#6366f1',
+                    border: '1px solid rgba(99, 102, 241, 0.25)',
+                  }}
+                >
+                  🚀 {executionStats.runner}
+                </span>
+              )}
             </div>
           )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setShowStdinDrawer((prev) => !prev)}
+            className="btn btn-sm btn-ghost"
+            id="compiler-stdin-toggle-btn"
+            title="Provide custom stdin input stream for Scanner / cin / Judge0"
+            style={{
+              padding: '0.45rem 0.75rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: showStdinDrawer || stdinInput.trim() ? '#0284c7' : themeColors.textMuted,
+              backgroundColor: showStdinDrawer ? 'rgba(2, 132, 199, 0.1)' : 'transparent',
+              border: `1px solid ${showStdinDrawer ? '#0284c7' : themeColors.border}`,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+            }}
+          >
+            <span>📥 Stdin {stdinInput.trim() ? '●' : ''}</span>
+          </button>
+
           <button
             type="button"
             onClick={handleRunTests}

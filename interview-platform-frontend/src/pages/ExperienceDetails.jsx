@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import experienceApi from '../api/experienceApi'
 import roundApi from '../api/roundApi'
 import questionApi from '../api/questionApi'
+import bookmarkApi from '../api/bookmarkApi'
 import RoundCard from '../components/round/RoundCard'
 import RoundFormModal from '../components/round/RoundFormModal'
 import QuestionFormModal from '../components/question/QuestionFormModal'
@@ -38,6 +39,8 @@ export function ExperienceDetails() {
   // Data states
   const [experience, setExperience] = useState(null)
   const [roundsWithQuestions, setRoundsWithQuestions] = useState([])
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isBookmarking, setIsBookmarking] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [notFound, setNotFound] = useState(false)
@@ -118,6 +121,14 @@ export function ExperienceDetails() {
       )
 
       setRoundsWithQuestions(enrichedRounds)
+      if (isAuthenticated) {
+        bookmarkApi.getBookmarkedIds().then((res) => {
+          const ids = res.data?.data || res.data || []
+          if (Array.isArray(ids) && ids.includes(Number(id))) {
+            setIsBookmarked(true)
+          }
+        }).catch(() => {})
+      }
     } catch (err) {
       console.error('[ExperienceDetails] Error loading experience:', err)
       if (err.status === 404 || (err.message && err.message.includes('404'))) {
@@ -132,11 +143,29 @@ export function ExperienceDetails() {
     }
   }
 
+  const handleToggleBookmark = async () => {
+    if (!isAuthenticated) {
+      alert('Please sign in to save experiences to your prep list.')
+      return
+    }
+
+    setIsBookmarking(true)
+    try {
+      const res = await bookmarkApi.toggleBookmark(id)
+      const data = res.data?.data || res.data
+      setIsBookmarked(data.bookmarked ?? !isBookmarked)
+    } catch (err) {
+      console.error('Failed to toggle bookmark:', err)
+    } finally {
+      setIsBookmarking(false)
+    }
+  }
+
   useEffect(() => {
     if (id) {
       loadExperienceDetails()
     }
-  }, [id])
+  }, [id, isAuthenticated])
 
   // Owner and Admin Controls Check
   const isOwner = Boolean(
@@ -460,9 +489,30 @@ export function ExperienceDetails() {
             </span>
           </div>
 
-          {/* Live Chat with Author */}
-          {experience.user?.id && !isOwner && (
-            <div style={{ marginLeft: 'auto' }}>
+          {/* Action buttons: Save to Prep List & Chat with Author */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleToggleBookmark}
+              disabled={isBookmarking}
+              className={`btn btn-sm ${isBookmarked ? 'btn-primary' : 'btn-outline'}`}
+              id="btn-bookmark-details"
+              title={isBookmarked ? 'Saved to your Prep List' : 'Save to My Prep List'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                padding: '0.35rem 0.85rem',
+                borderRadius: '6px',
+              }}
+            >
+              <span>{isBookmarked ? '🔖' : '📑'}</span>
+              <span>{isBookmarked ? 'Saved to Prep List' : 'Save to Prep List'}</span>
+            </button>
+
+            {experience.user?.id && !isOwner && (
               <Link
                 to={`/chat?userId=${experience.user.id}&userName=${encodeURIComponent(experience.user.name || 'Author')}`}
                 className="btn btn-sm btn-primary"
@@ -480,8 +530,8 @@ export function ExperienceDetails() {
                 <span>💬</span>
                 <span>Chat with Author</span>
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* OWNER & ADMIN CONTROLS FOR EXPERIENCE */}
@@ -538,6 +588,114 @@ export function ExperienceDetails() {
           </div>
         )}
       </header>
+
+      {/* Verified Offer & Compensation Breakdown Card */}
+      {(experience.totalCompensation || experience.baseSalary) && (
+        <section
+          className="card"
+          id="experience-salary-breakdown-card"
+          style={{
+            padding: '1.75rem 2rem',
+            marginBottom: '2.5rem',
+            backgroundColor: 'var(--bg-card)',
+            border: '2px solid rgba(16, 185, 129, 0.4)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: '0 4px 16px rgba(16, 185, 129, 0.08)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.4rem' }}>💰</span>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                  Verified Offer & Compensation Breakdown
+                </h2>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Self-reported candidate compensation package at {experience.company?.name || 'Company'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              {experience.offerAccepted !== null && experience.offerAccepted !== undefined && (
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: experience.offerAccepted ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                    color: experience.offerAccepted ? '#10b981' : 'var(--text-secondary)',
+                    border: `1px solid ${experience.offerAccepted ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-medium)'}`,
+                  }}
+                >
+                  {experience.offerAccepted ? '✓ Offer Accepted' : 'Offer Declined / Other Choice'}
+                </span>
+              )}
+              {experience.jobLevel && (
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: 'var(--radius-full)',
+                    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                    color: 'var(--brand-primary)',
+                  }}
+                >
+                  Level: {experience.jobLevel}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+            <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Total Annual Compensation
+              </div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#10b981', marginTop: '0.25rem' }}>
+                {experience.currency || '$'}{Number(experience.totalCompensation || 0).toLocaleString()}
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginLeft: '0.25rem' }}>/ yr</span>
+              </div>
+            </div>
+
+            {experience.baseSalary && (
+              <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Base Salary
+                </div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+                  {experience.currency || '$'}{Number(experience.baseSalary).toLocaleString()}
+                </div>
+              </div>
+            )}
+
+            {experience.stockGrant && (
+              <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Stock / Equity Grant
+                </div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0284c7', marginTop: '0.25rem' }}>
+                  {experience.currency || '$'}{Number(experience.stockGrant).toLocaleString()}
+                </div>
+              </div>
+            )}
+
+            {experience.signingBonus && (
+              <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Signing / Relocation Bonus
+                </div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f59e0b', marginTop: '0.25rem' }}>
+                  {experience.currency || '$'}{Number(experience.signingBonus).toLocaleString()}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
 
       {/* Complete Experience Description Section */}
       <section

@@ -94,7 +94,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/rounds", "/api/rounds/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/questions", "/api/questions/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/custom-swagger.css").permitAll()
-                        .requestMatchers("/actuator/**", "/api/system/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/ai/mock-interview/**").permitAll()
+                        .requestMatchers("/api/bookmarks", "/api/bookmarks/**").authenticated()
                         // Company endpoints RBAC
                         .requestMatchers(HttpMethod.POST, "/api/companies").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/companies/**").hasRole("ADMIN")

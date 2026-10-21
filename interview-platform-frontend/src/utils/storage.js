@@ -10,6 +10,10 @@ export const getToken = () => {
   }
 }
 
+export const isAuthenticated = () => {
+  return Boolean(getToken())
+}
+
 export const setToken = (token) => {
   try {
     if (token) {
@@ -67,6 +71,7 @@ export const clearStorage = () => {
 
 export const storage = {
   getToken,
+  isAuthenticated,
   setToken,
   removeToken,
   getUser,

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import CodeCompilerPlayground from '../components/compiler/CodeCompilerPlayground'
 
@@ -162,7 +162,7 @@ export function Playground() {
           }}
         >
           <span>⚡</span>
-          <span>Interactive Code Playground</span>
+          <span>Code Playground</span>
         </div>
 
         <h1
@@ -174,26 +174,26 @@ export function Playground() {
           }}
           id="playground-heading"
         >
-          In-Browser Code IDE & Test Runner
+          Code Playground
         </h1>
 
         <p
           style={{
             color: 'var(--text-secondary)',
             fontSize: '1.05rem',
-            maxWidth: '680px',
+            maxWidth: '640px',
             margin: '0 auto',
             lineHeight: 1.6,
           }}
         >
-          Practice real technical interview problems, run test cases, inspect terminal output, or fork candidate solutions without installing local dependencies.
+          Run code, test solutions, and practice common interview questions directly in your browser.
         </p>
       </div>
 
       {/* Featured Challenge Selector Pills */}
       <div style={{ marginBottom: '1.5rem' }}>
         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.65rem' }}>
-          🔥 Quick Practice Templates:
+          Practice Problems:
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
           {FEATURED_CHALLENGES.map((ch) => {

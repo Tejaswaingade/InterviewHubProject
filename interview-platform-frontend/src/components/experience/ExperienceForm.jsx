@@ -169,6 +169,13 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
       initialValues.yearsOfExperience !== undefined && initialValues.yearsOfExperience !== null
         ? String(initialValues.yearsOfExperience)
         : '',
+    jobLevel: initialValues.jobLevel || '',
+    currency: initialValues.currency || 'USD',
+    baseSalary: initialValues.baseSalary ? String(initialValues.baseSalary) : '',
+    stockGrant: initialValues.stockGrant ? String(initialValues.stockGrant) : '',
+    signingBonus: initialValues.signingBonus ? String(initialValues.signingBonus) : '',
+    totalCompensation: initialValues.totalCompensation ? String(initialValues.totalCompensation) : '',
+    offerAccepted: initialValues.offerAccepted ?? false,
     preparationTips: '',
   })
 
@@ -212,6 +219,13 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
           initialValues.yearsOfExperience !== undefined && initialValues.yearsOfExperience !== null
             ? String(initialValues.yearsOfExperience)
             : '',
+        jobLevel: initialValues.jobLevel || '',
+        currency: initialValues.currency || 'USD',
+        baseSalary: initialValues.baseSalary ? String(initialValues.baseSalary) : '',
+        stockGrant: initialValues.stockGrant ? String(initialValues.stockGrant) : '',
+        signingBonus: initialValues.signingBonus ? String(initialValues.signingBonus) : '',
+        totalCompensation: initialValues.totalCompensation ? String(initialValues.totalCompensation) : '',
+        offerAccepted: initialValues.offerAccepted ?? false,
         preparationTips: '',
       })
     }
@@ -376,6 +390,14 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
     setSubmittingStatusText(isEditing ? 'Updating experience...' : 'Publishing interview experience...')
 
     try {
+      const base = formData.baseSalary ? Number(formData.baseSalary) : null
+      const stock = formData.stockGrant ? Number(formData.stockGrant) : null
+      const bonus = formData.signingBonus ? Number(formData.signingBonus) : null
+      let total = formData.totalCompensation ? Number(formData.totalCompensation) : null
+      if (!total && (base || stock || bonus)) {
+        total = (base || 0) + (stock || 0) + (bonus || 0)
+      }
+
       const payload = {
         companyId: Number(formData.companyId),
         jobRole: formData.jobRole.trim(),
@@ -384,6 +406,13 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
         overallDifficulty: formData.overallDifficulty || 'MEDIUM',
         result: formData.result || 'WAITING',
         yearsOfExperience: formData.yearsOfExperience ? Number(formData.yearsOfExperience) : 0,
+        jobLevel: formData.jobLevel ? formData.jobLevel.trim() : null,
+        currency: formData.currency || 'USD',
+        baseSalary: base,
+        stockGrant: stock,
+        signingBonus: bonus,
+        totalCompensation: total,
+        offerAccepted: Boolean(formData.offerAccepted),
       }
 
       let res
@@ -770,10 +799,12 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                     <button
                       type="button"
                       onClick={() => handleRemoveRound(idx)}
-                      className="wizard-round-del-btn"
-                      title="Remove round"
+                      className="btn btn-sm btn-ghost text-danger"
+                      title="Delete round"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#ef4444', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
                     >
-                      ✕
+                      <span>🗑️</span>
+                      <span>Delete</span>
                     </button>
                   </div>
                 ))}
@@ -1000,10 +1031,12 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   <button
                     type="button"
                     onClick={() => handleRemoveQuestion(idx)}
-                    className="wizard-round-del-btn"
-                    title="Remove question"
+                    className="btn btn-sm btn-ghost text-danger"
+                    title="Delete question"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#ef4444', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
                   >
-                    ✕
+                    <span>🗑️</span>
+                    <span>Delete</span>
                   </button>
                 </div>
               ))}
@@ -1108,6 +1141,131 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Verified Offer & Salary Breakdown (Optional & Anonymous) */}
+          <div
+            style={{
+              padding: '1.25rem 1.5rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-medium)',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>💰</span>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                Verified Offer & Compensation Breakdown (Optional)
+              </h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+              Share your compensation package to help other engineers benchmark company pay bands. All data is anonymous.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label className="wizard-label" htmlFor="input-salary-currency">
+                  Currency
+                </label>
+                <select
+                  id="input-salary-currency"
+                  className="wizard-select"
+                  value={formData.currency}
+                  onChange={(e) => handleChange('currency', e.target.value)}
+                >
+                  <option value="USD">USD ($) - United States Dollar</option>
+                  <option value="INR">INR (₹) - Indian Rupee</option>
+                  <option value="EUR">EUR (€) - Euro</option>
+                  <option value="GBP">GBP (£) - British Pound</option>
+                  <option value="CAD">CAD ($) - Canadian Dollar</option>
+                  <option value="SGD">SGD ($) - Singapore Dollar</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="wizard-label" htmlFor="input-salary-level">
+                  Job Level / Grade
+                </label>
+                <input
+                  type="text"
+                  id="input-salary-level"
+                  className="wizard-input"
+                  placeholder="e.g. L4 / SDE II / Senior / IC5"
+                  value={formData.jobLevel}
+                  onChange={(e) => handleChange('jobLevel', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="wizard-label" htmlFor="input-base-salary">
+                  Base Salary (Annual)
+                </label>
+                <input
+                  type="number"
+                  id="input-base-salary"
+                  className="wizard-input"
+                  placeholder="e.g. 150000"
+                  value={formData.baseSalary}
+                  onChange={(e) => handleChange('baseSalary', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="wizard-label" htmlFor="input-stock-grant">
+                  Stock / Equity Grant (Annual/4-Yr)
+                </label>
+                <input
+                  type="number"
+                  id="input-stock-grant"
+                  className="wizard-input"
+                  placeholder="e.g. 40000"
+                  value={formData.stockGrant}
+                  onChange={(e) => handleChange('stockGrant', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="wizard-label" htmlFor="input-signing-bonus">
+                  Signing / Performance Bonus
+                </label>
+                <input
+                  type="number"
+                  id="input-signing-bonus"
+                  className="wizard-input"
+                  placeholder="e.g. 20000"
+                  value={formData.signingBonus}
+                  onChange={(e) => handleChange('signingBonus', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="wizard-label" htmlFor="input-total-comp">
+                  Total Compensation (CTC / yr)
+                </label>
+                <input
+                  type="number"
+                  id="input-total-comp"
+                  className="wizard-input"
+                  placeholder="Auto-calculated if blank"
+                  value={formData.totalCompensation}
+                  onChange={(e) => handleChange('totalCompensation', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <input
+                type="checkbox"
+                id="input-offer-accepted"
+                checked={formData.offerAccepted}
+                onChange={(e) => handleChange('offerAccepted', e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <label htmlFor="input-offer-accepted" style={{ fontSize: '0.85rem', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}>
+                I accepted this offer and joined the company
+              </label>
             </div>
           </div>
 

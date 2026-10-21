@@ -57,6 +57,14 @@ public class InterviewExperienceService {
                 .overallDifficulty(request.getOverallDifficulty())
                 .result(request.getResult())
                 .yearsOfExperience(request.getYearsOfExperience())
+                .baseSalary(request.getBaseSalary())
+                .stockGrant(request.getStockGrant())
+                .signingBonus(request.getSigningBonus())
+                .totalCompensation(request.getTotalCompensation() != null ? request.getTotalCompensation() :
+                        (request.getBaseSalary() != null ? request.getBaseSalary() + (request.getStockGrant() != null ? request.getStockGrant() : 0.0) + (request.getSigningBonus() != null ? request.getSigningBonus() : 0.0) : null))
+                .currency(request.getCurrency() != null && !request.getCurrency().isBlank() ? request.getCurrency() : "INR")
+                .jobLevel(request.getJobLevel())
+                .offerAccepted(request.getOfferAccepted())
                 .build();
 
         InterviewExperience saved = experienceRepository.save(experience);
@@ -126,6 +134,13 @@ public class InterviewExperienceService {
         experience.setOverallDifficulty(request.getOverallDifficulty());
         experience.setResult(request.getResult());
         experience.setYearsOfExperience(request.getYearsOfExperience());
+        if (request.getBaseSalary() != null) experience.setBaseSalary(request.getBaseSalary());
+        if (request.getStockGrant() != null) experience.setStockGrant(request.getStockGrant());
+        if (request.getSigningBonus() != null) experience.setSigningBonus(request.getSigningBonus());
+        if (request.getTotalCompensation() != null) experience.setTotalCompensation(request.getTotalCompensation());
+        if (request.getCurrency() != null) experience.setCurrency(request.getCurrency());
+        if (request.getJobLevel() != null) experience.setJobLevel(request.getJobLevel());
+        if (request.getOfferAccepted() != null) experience.setOfferAccepted(request.getOfferAccepted());
 
         InterviewExperience updated = experienceRepository.save(experience);
         return toResponse(updated);
@@ -221,6 +236,13 @@ public class InterviewExperienceService {
                 .overallDifficulty(exp.getOverallDifficulty())
                 .result(exp.getResult())
                 .yearsOfExperience(exp.getYearsOfExperience())
+                .baseSalary(exp.getBaseSalary())
+                .stockGrant(exp.getStockGrant())
+                .signingBonus(exp.getSigningBonus())
+                .totalCompensation(exp.getTotalCompensation())
+                .currency(exp.getCurrency())
+                .jobLevel(exp.getJobLevel())
+                .offerAccepted(exp.getOfferAccepted())
                 .createdAt(exp.getCreatedAt())
                 .updatedAt(exp.getUpdatedAt())
                 .build();

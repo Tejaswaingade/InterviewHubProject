@@ -28,6 +28,13 @@ public class ExperienceResponse {
     private Difficulty overallDifficulty;
     private ResultStatus result;
     private Double yearsOfExperience;
+    private Double baseSalary;
+    private Double stockGrant;
+    private Double signingBonus;
+    private Double totalCompensation;
+    private String currency;
+    private String jobLevel;
+    private Boolean offerAccepted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

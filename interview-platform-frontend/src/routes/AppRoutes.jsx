@@ -16,6 +16,8 @@ import About from '../pages/About'
 import AdminDashboard from '../pages/AdminDashboard'
 import Playground from '../pages/Playground'
 import Chat from '../pages/Chat'
+import MockInterview from '../pages/MockInterview'
+import PrepRoadmap from '../pages/PrepRoadmap'
 import NotFound from '../pages/NotFound'
 import ProtectedRoute from './ProtectedRoute'
 import AdminRoute from './AdminRoute'
@@ -27,6 +29,7 @@ export function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/mock-interview" element={<MockInterview />} />
       <Route
         path="/experiences"
         element={
@@ -54,6 +57,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/roadmap"
+        element={
+          <ProtectedRoute>
+            <PrepRoadmap />
           </ProtectedRoute>
         }
       />

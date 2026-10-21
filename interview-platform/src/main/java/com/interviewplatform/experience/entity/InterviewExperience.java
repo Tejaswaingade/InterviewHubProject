@@ -55,6 +55,29 @@ public class InterviewExperience {
     @Column(name = "years_of_experience")
     private Double yearsOfExperience;
 
+    // --- Verified Offer & Compensation Details (Optional) ---
+    @Column(name = "base_salary")
+    private Double baseSalary;
+
+    @Column(name = "stock_grant")
+    private Double stockGrant;
+
+    @Column(name = "signing_bonus")
+    private Double signingBonus;
+
+    @Column(name = "total_compensation")
+    private Double totalCompensation;
+
+    @Column(name = "currency", length = 10)
+    @Builder.Default
+    private String currency = "INR";
+
+    @Column(name = "job_level", length = 50)
+    private String jobLevel;
+
+    @Column(name = "offer_accepted")
+    private Boolean offerAccepted;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
