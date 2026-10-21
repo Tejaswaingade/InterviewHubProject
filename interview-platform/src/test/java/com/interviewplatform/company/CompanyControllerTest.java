@@ -74,7 +74,7 @@ class CompanyControllerTest {
         userRepository.deleteAll();
 
         // Create standard user
-        User user = userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .name("Normal User")
                 .email("user@example.com")
                 .password(passwordEncoder.encode("password123"))
@@ -82,7 +82,7 @@ class CompanyControllerTest {
                 .build());
 
         // Create admin user
-        User admin = userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .name("Admin User")
                 .email("admin@example.com")
                 .password(passwordEncoder.encode("admin123"))
