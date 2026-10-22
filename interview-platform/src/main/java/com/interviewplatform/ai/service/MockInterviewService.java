@@ -11,107 +11,363 @@ import java.util.*;
 @Service
 public class MockInterviewService {
 
+    private static final Random RANDOM = new Random();
+
     public List<MockInterviewQuestion> generateQuestions(MockInterviewRequest request) {
-        String role = (request.getRole() != null && !request.getRole().isBlank()) ? request.getRole() : "Software Engineer";
-        String domain = (request.getDomain() != null && !request.getDomain().isBlank()) ? request.getDomain() : "Full-Stack";
-        String difficulty = (request.getDifficulty() != null && !request.getDifficulty().isBlank()) ? request.getDifficulty() : "MEDIUM";
+        String role = (request.getRole() != null && !request.getRole().isBlank()) ? request.getRole().trim() : "Software Engineer";
+        String domain = (request.getDomain() != null && !request.getDomain().isBlank()) ? request.getDomain().trim() : "Distributed Systems";
+        String difficulty = (request.getDifficulty() != null && !request.getDifficulty().isBlank()) ? request.getDifficulty().trim().toUpperCase() : "MEDIUM";
+        String focus = (request.getResumeSnippet() != null && !request.getResumeSnippet().isBlank()) ? request.getResumeSnippet().trim() : "";
+
+        // Scale factor & TPS based on difficulty
+        String tpsScale;
+        int systemDesignSeconds;
+        int codingSeconds;
+        switch (difficulty) {
+            case "EASY":
+            case "JUNIOR":
+                tpsScale = "10,000 req/sec";
+                systemDesignSeconds = 720; // 12 mins for junior
+                codingSeconds = 900;
+                break;
+            case "HARD":
+            case "STAFF":
+                tpsScale = "500,000 req/sec";
+                systemDesignSeconds = 600; // 10 mins
+                codingSeconds = 1200; // 20 mins
+                break;
+            case "MEDIUM":
+            default:
+                tpsScale = "100,000 req/sec";
+                systemDesignSeconds = 600; // 10 mins standard FAANG framing
+                codingSeconds = 900; // 15 mins
+                break;
+        }
 
         List<MockInterviewQuestion> questions = new ArrayList<>();
+        boolean isFrontend = role.toLowerCase().contains("front") || domain.toLowerCase().contains("react") || domain.toLowerCase().contains("web");
+        boolean isDevOps = role.toLowerCase().contains("devops") || role.toLowerCase().contains("cloud") || domain.toLowerCase().contains("kubernetes");
+        boolean isStaff = role.toLowerCase().contains("staff") || role.toLowerCase().contains("architect") || difficulty.contains("STAFF") || difficulty.contains("HARD");
 
-        // Question 1: System Design / Scalability
-        questions.add(MockInterviewQuestion.builder()
-                .id("q-" + UUID.randomUUID().toString().substring(0, 8))
-                .category("SYSTEM_DESIGN")
-                .difficulty(difficulty)
-                .timeLimitSeconds(600)
-                .question(String.format("Design a distributed, low-latency rate limiter for a multi-tenant %s platform serving 100,000 requests/sec. How do you handle clock drift, bursty traffic, and cross-datacenter synchronization?", role))
-                .hints(List.of(
-                        "Consider Token Bucket vs Sliding Window Counter algorithms",
-                        "Think about Redis cluster vs in-memory local caches with eventual consistency",
-                        "Discuss fail-open vs fail-closed strategies during network partitions"
-                ))
-                .expectedKeyPoints(List.of(
-                        "Selection of Token Bucket or Sliding Window Log/Counter",
-                        "Redis integration via Lua scripts for atomic increments",
-                        "Multi-region data replication trade-offs (CAP theorem)",
-                        "Header responses (X-RateLimit-Remaining, Retry-After)"
-                ))
-                .followUpQuestions(List.of(
-                        "How would you prevent DDoS attacks where attackers bypass IP rate limits using rotating proxies?",
-                        "What is the memory footprint of storing state for 50 million active users?"
-                ))
-                .build());
+        // -------------------------------------------------------------
+        // Round 1: SYSTEM DESIGN / SCALABILITY (Role & Domain Adaptive)
+        // -------------------------------------------------------------
+        int sysDesignVariant = RANDOM.nextInt(3);
+        if (isFrontend) {
+            if (sysDesignVariant == 0) {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("SYSTEM_DESIGN")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(systemDesignSeconds)
+                        .question(String.format("Design a high-performance web dashboard for %s capable of streaming real-time metrics at %s with zero UI stutter (60 FPS) and offline local synchronization. How do you handle DOM virtualization, WebSocket backpressure, and state rehydration%s?", role, tpsScale, focus.isEmpty() ? "" : " with focus on " + focus))
+                        .hints(List.of(
+                                "Virtualize long data lists (react-window or custom intersection observer)",
+                                "Decouple WebSocket event intake from React rendering loop via requestAnimationFrame throttling",
+                                "IndexedDB for offline client-side persistence and optimistic UI updates"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Render pipeline decoupling (buffering high-frequency events)",
+                                "DOM node recycling to avoid browser layout thrashing",
+                                "State rehydration and conflict resolution for offline edits"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How do you profile and eliminate Cumulative Layout Shift (CLS) on dynamic cards?",
+                                "What is your memory management strategy to prevent long-lived Single Page Application leaks?"
+                        ))
+                        .build());
+            } else {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("SYSTEM_DESIGN")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(systemDesignSeconds)
+                        .question(String.format("Architect a scalable Micro-Frontend platform for %s utilizing Module Federation. How do you manage shared dependencies, isolated state management, cross-app routing, and atomic independent deployments?", role))
+                        .hints(List.of(
+                                "Webpack 5 Module Federation or Vite dynamic federation",
+                                "Shared singleton context for authentication and theme tokens",
+                                "Event bus vs Custom DOM events for decoupled micro-app communication"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Runtime dependency resolution and fallback handling",
+                                "CSS isolation (Shadow DOM or CSS Modules)",
+                                "Independent CI/CD pipelines with canary asset delivery"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How do you handle version drift between host container and federated remotes?",
+                                "What fallback mechanisms protect users if a federated bundle returns 502 Bad Gateway?"
+                        ))
+                        .build());
+            }
+        } else if (isDevOps) {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("SYSTEM_DESIGN")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(systemDesignSeconds)
+                    .question(String.format("Design a multi-region, zero-downtime Kubernetes infrastructure supporting %s handling %s. How do you structure automated blue-green/canary rollouts, cross-region traffic balancing, and instant automated rollback on 5xx metric spikes?", role, tpsScale))
+                    .hints(List.of(
+                                "ArgoCD or Spinnaker for progressive canary delivery",
+                                "Istio/Envoy service mesh for weighted traffic splits (e.g. 5% canary)",
+                                "Prometheus SLO alerts triggering automated Kubernetes rollback"
+                    ))
+                    .expectedKeyPoints(List.of(
+                                "Global Anycast DNS or Geo-IP load balancing",
+                                "Stateful service multi-region replication constraints",
+                                "Canary validation metrics (error rate, P99 latency)"
+                    ))
+                    .followUpQuestions(List.of(
+                                "How do you prevent split-brain during a sudden inter-region link severance?",
+                                "What is your cost-optimization strategy for cross-AZ data egress?"
+                    ))
+                    .build());
+        } else {
+            // Backend & General Systems
+            if (sysDesignVariant == 0) {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("SYSTEM_DESIGN")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(systemDesignSeconds)
+                        .question(String.format("Design a distributed, low-latency rate limiter for a multi-tenant %s platform serving %s. How do you handle clock drift, bursty traffic, and cross-datacenter synchronization%s?", role, tpsScale, focus.isEmpty() ? "" : " with special attention to " + focus))
+                        .hints(List.of(
+                                "Consider Token Bucket vs Sliding Window Counter algorithms",
+                                "Think about Redis cluster vs in-memory local caches with eventual consistency",
+                                "Discuss fail-open vs fail-closed strategies during network partitions"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Selection of Token Bucket or Sliding Window Log/Counter",
+                                "Redis integration via Lua scripts for atomic increments",
+                                "Multi-region data replication trade-offs (CAP theorem)",
+                                "Header responses (X-RateLimit-Remaining, Retry-After)"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How would you prevent DDoS attacks where attackers bypass IP rate limits using rotating proxies?",
+                                "What is the memory footprint of storing state for 50 million active users?"
+                        ))
+                        .build());
+            } else if (sysDesignVariant == 1) {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("SYSTEM_DESIGN")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(systemDesignSeconds)
+                        .question(String.format("Design a distributed, fault-tolerant Event Streaming and Notification Fan-out system for %s handling %s. How do you ensure exactly-once delivery semantics, handle poison pill messages, and prevent consumer group starvation?", role, tpsScale))
+                        .hints(List.of(
+                                "Kafka or RabbitMQ partitioning key strategy",
+                                "Transactional Outbox pattern combined with Debezium CDC",
+                                "Dead Letter Queues (DLQ) with exponential backoff and jitter"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Partition key assignment preventing hot partition bottlenecks",
+                                "Idempotent consumer deduplication via Redis or DB unique constraints",
+                                "Backpressure handling to protect downstream third-party notification APIs"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How do you rebalance consumer groups during dynamic autoscaling without stop-the-world lag?",
+                                "What telemetry monitors consumer lag across hundreds of partition topics?"
+                        ))
+                        .build());
+            } else {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("SYSTEM_DESIGN")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(systemDesignSeconds)
+                        .question(String.format("Design a global Distributed Caching layer for %s supporting %s with sub-5ms P99 read latency. How do you prevent cache stampedes, manage multi-region cache invalidation, and ensure consistency during backend database updates?", role, tpsScale))
+                        .hints(List.of(
+                                "Cache-Aside vs Write-Through vs Write-Behind strategies",
+                                "Mutex locks / probabilistic early expiration (XFetch algorithm) for thundering herd",
+                                "Pub/Sub based cache invalidation bus"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Cache stampede prevention techniques",
+                                "Consistent hashing with virtual nodes to minimize rehash disruption",
+                                "Replication lag mitigation between master database and distributed caches"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How would you handle sudden memory eviction under unexpected 10x traffic spikes?",
+                                "What are the trade-offs of storing serialized JSON vs binary protobuf in cache?"
+                        ))
+                        .build());
+            }
+        }
 
-        // Question 2: Data Structures & Core Logic
-        questions.add(MockInterviewQuestion.builder()
-                .id("q-" + UUID.randomUUID().toString().substring(0, 8))
-                .category("CODING")
-                .difficulty(difficulty)
-                .timeLimitSeconds(900)
-                .question(String.format("Explain how you would implement a concurrent LRU Cache with O(1) get/put operations and thread-safe eviction in your primary tech stack for %s.", role))
-                .hints(List.of(
-                        "Combine a doubly linked list with a concurrent hash table",
-                        "Consider fine-grained locking or ReadWriteLocks over synchronized blocks",
-                        "Address race conditions between reading a node and evicting the tail"
-                ))
-                .expectedKeyPoints(List.of(
-                        "Doubly linked list allows O(1) node removal and prepend to head",
-                        "Hash map stores Key -> Node reference for O(1) search",
-                        "ReentrantReadWriteLock or lock-free segment strategies",
-                        "Proper handling of capacity overflows and concurrent modifications"
-                ))
-                .followUpQuestions(List.of(
-                        "How would you add time-to-live (TTL) expiration alongside capacity-based eviction?",
-                        "What are the CPU cache locality implications of pointer-heavy doubly linked lists?"
-                ))
-                .build());
+        // -------------------------------------------------------------
+        // Round 2: DATA STRUCTURES & CORE LOGIC (Coding & Concurrency)
+        // -------------------------------------------------------------
+        int codingVariant = RANDOM.nextInt(2);
+        if (isFrontend) {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("CODING")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(codingSeconds)
+                    .question(String.format("Implement an asynchronous Request Deduplicator and In-Memory Promise Cache in TypeScript/JavaScript for %s. It must deduplicate concurrent in-flight requests for identical endpoints, provide TTL expiration, and support request abort signals.", role))
+                    .hints(List.of(
+                            "Store in-flight Promise objects in a Map keyed by request signature",
+                            "Attach .finally() to in-flight promises to clean up the pending cache",
+                            "Propagate AbortController signal correctly to cancel underlying fetches"
+                    ))
+                    .expectedKeyPoints(List.of(
+                            "Concurrent identical requests share the exact same pending Promise",
+                            "Cache invalidation on TTL expiry or mutation",
+                            "Proper error propagation without crashing shared promise listeners"
+                    ))
+                    .followUpQuestions(List.of(
+                            "How do you handle cache stampedes when 1,000 components mount simultaneously?",
+                            "What is the memory cleanup strategy for long-running single page sessions?"
+                    ))
+                    .build());
+        } else {
+            if (codingVariant == 0) {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("CODING")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(codingSeconds)
+                        .question(String.format("Explain how you would implement a concurrent LRU Cache with O(1) get/put operations and thread-safe eviction in your primary tech stack for %s.", role))
+                        .hints(List.of(
+                                "Combine a doubly linked list with a concurrent hash table",
+                                "Consider fine-grained locking or ReadWriteLocks over synchronized blocks",
+                                "Address race conditions between reading a node and evicting the tail"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Doubly linked list allows O(1) node removal and prepend to head",
+                                "Hash map stores Key -> Node reference for O(1) search",
+                                "ReentrantReadWriteLock or lock-free segment strategies",
+                                "Proper handling of capacity overflows and concurrent modifications"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How would you add time-to-live (TTL) expiration alongside capacity-based eviction?",
+                                "What are the CPU cache locality implications of pointer-heavy doubly linked lists?"
+                        ))
+                        .build());
+            } else {
+                questions.add(MockInterviewQuestion.builder()
+                        .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                        .category("CODING")
+                        .difficulty(difficulty)
+                        .timeLimitSeconds(codingSeconds)
+                        .question(String.format("Design and implement a thread-safe Bounded In-Memory Queue / Ring Buffer supporting multiple producers and multiple consumers without global lock contention for %s.", role))
+                        .hints(List.of(
+                                "Use atomic pointers (AtomicLong / compare-and-swap) for head and tail sequence numbers",
+                                "Power-of-two capacity for fast bitwise modulo indexing (index & (capacity - 1))",
+                                "Address false sharing via cache line padding"
+                        ))
+                        .expectedKeyPoints(List.of(
+                                "Lock-free or striped locking concurrency mechanism",
+                                "Correct handling of buffer overflow (blocking, dropping, or rejecting)",
+                                "Memory visibility guarantees (volatile / atomic semantics)"
+                        ))
+                        .followUpQuestions(List.of(
+                                "How does the LMAX Disruptor architecture achieve millions of ops/sec using ring buffers?",
+                                "How do you detect and recover from slow or stalled consumers?"
+                        ))
+                        .build());
+            }
+        }
 
-        // Question 3: Architecture & Reliability
-        questions.add(MockInterviewQuestion.builder()
-                .id("q-" + UUID.randomUUID().toString().substring(0, 8))
-                .category("ARCHITECTURE")
-                .difficulty(difficulty)
-                .timeLimitSeconds(600)
-                .question(String.format("A critical database migration in production locks tables and causes cascading timeouts during peak traffic. Walk me through your step-by-step incident response, zero-downtime schema evolution strategy, and rollback plan.", role))
-                .hints(List.of(
-                        "Zero-downtime expand-contract (parallel run) pattern",
-                        "Dual writing vs database triggers",
-                        "Circuit breakers to isolate backend timeouts"
-                ))
-                .expectedKeyPoints(List.of(
-                        "Immediate incident mitigation (kill blocking queries, activate circuit breakers)",
-                        "Expand-Contract schema pattern (Add column -> Dual write -> Backfill -> Read new -> Drop old)",
-                        "Post-mortem root cause analysis and preventative guardrails"
-                ))
-                .followUpQuestions(List.of(
-                        "How do you ensure data integrity during backfilling 500 million rows without spiking replication lag?",
-                        "What telemetry and alerts should have caught the query lock before production degraded?"
-                ))
-                .build());
+        // -------------------------------------------------------------
+        // Round 3: ARCHITECTURE & PRODUCTION RELIABILITY
+        // -------------------------------------------------------------
+        int archVariant = RANDOM.nextInt(2);
+        if (archVariant == 0 || isStaff) {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("ARCHITECTURE")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(600)
+                    .question(String.format("A critical database migration in production locks core tables and causes cascading timeouts during peak traffic on %s. Walk me through your step-by-step incident response, zero-downtime schema evolution strategy, and rollback plan.", role))
+                    .hints(List.of(
+                            "Zero-downtime expand-contract (parallel run) pattern",
+                            "Dual writing vs database triggers",
+                            "Circuit breakers to isolate backend timeouts"
+                    ))
+                    .expectedKeyPoints(List.of(
+                            "Immediate incident mitigation (kill blocking queries, activate circuit breakers)",
+                            "Expand-Contract schema pattern (Add column -> Dual write -> Backfill -> Read new -> Drop old)",
+                            "Post-mortem root cause analysis and preventative guardrails"
+                    ))
+                    .followUpQuestions(List.of(
+                            "How do you ensure data integrity during backfilling 500 million rows without spiking replication lag?",
+                            "What telemetry and alerts should have caught the query lock before production degraded?"
+                    ))
+                    .build());
+        } else {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("ARCHITECTURE")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(600)
+                    .question(String.format("Your platform experiences a cascading outage when a downstream microservice dependencies latency spikes from 15ms to 8,000ms. How do you design client-side resilience, bulkhead isolation, and circuit breaker recovery for %s?", role))
+                    .hints(List.of(
+                            "Resilience4j / Hystrix circuit breaker states (Closed, Open, Half-Open)",
+                            "Bulkhead isolation pattern to limit concurrent thread pool saturation",
+                            "Graceful degradation with stale cache or mock fallbacks"
+                    ))
+                    .expectedKeyPoints(List.of(
+                            "Preventing connection pool exhaustion in caller services",
+                            "Configuring adaptive timeouts with exponential backoff and jitter",
+                            "Health checks and automated recovery validation"
+                    ))
+                    .followUpQuestions(List.of(
+                            "Why are retries without jitter dangerous during a thundering herd incident?",
+                            "How do distributed tracing tools like OpenTelemetry help identify the true bottleneck?"
+                    ))
+                    .build());
+        }
 
-        // Question 4: Behavioral & Engineering Leadership
-        questions.add(MockInterviewQuestion.builder()
-                .id("q-" + UUID.randomUUID().toString().substring(0, 8))
-                .category("BEHAVIORAL")
-                .difficulty(difficulty)
-                .timeLimitSeconds(480)
-                .question("Describe a time when you strongly disagreed with a technical design or architectural decision proposed by a Staff Engineer or Product Manager. How did you validate your hypothesis, influence the team, and what was the outcome?")
-                .hints(List.of(
-                        "Use the STAR method (Situation, Task, Action, Result)",
-                        "Focus on data, benchmarks, and customer impact rather than personal opinion",
-                        "Demonstrate disagree-and-commit maturity if the decision went the other way"
-                ))
-                .expectedKeyPoints(List.of(
-                        "Clear context and quantified technical trade-offs",
-                        "Objective proof (benchmarks, prototypes, POCs)",
-                        "Collaborative communication maintaining team trust",
-                        "Measurable business or latency impact achieved"
-                ))
-                .followUpQuestions(List.of(
-                        "If given the chance, what would you have done differently in hindsight?",
-                        "How did this experience shape how you mentor junior engineers?"
-                ))
-                .build());
+        // -------------------------------------------------------------
+        // Round 4: BEHAVIORAL & ENGINEERING LEADERSHIP (STAR Method)
+        // -------------------------------------------------------------
+        int behavVariant = RANDOM.nextInt(2);
+        if (behavVariant == 0) {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("BEHAVIORAL")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(480)
+                    .question("Describe a time when you strongly disagreed with a technical design or architectural decision proposed by a Staff Engineer or Product Manager. How did you validate your hypothesis, influence the team, and what was the outcome?")
+                    .hints(List.of(
+                            "Use the STAR method (Situation, Task, Action, Result)",
+                            "Focus on data, benchmarks, and customer impact rather than personal opinion",
+                            "Demonstrate disagree-and-commit maturity if the decision went the other way"
+                    ))
+                    .expectedKeyPoints(List.of(
+                            "Clear context and quantified technical trade-offs",
+                            "Objective proof (benchmarks, prototypes, POCs)",
+                            "Collaborative communication maintaining team trust",
+                            "Measurable business or latency impact achieved"
+                    ))
+                    .followUpQuestions(List.of(
+                            "If given the chance, what would you have done differently in hindsight?",
+                            "How did this experience shape how you mentor junior engineers?"
+                    ))
+                    .build());
+        } else {
+            questions.add(MockInterviewQuestion.builder()
+                    .id("q-" + UUID.randomUUID().toString().substring(0, 8))
+                    .category("BEHAVIORAL")
+                    .difficulty(difficulty)
+                    .timeLimitSeconds(480)
+                    .question("Tell me about a high-severity production incident you spearheaded. What was the blast radius, how did you lead the team under intense time pressure to diagnose root cause, and what architectural safeguards did you implement to prevent regression?")
+                    .hints(List.of(
+                            "STAR format focusing on composure, rapid triage, and communication",
+                            "Clear separation between immediate mitigation and long-term fix",
+                            "Blameless post-mortem culture and engineering improvements"
+                    ))
+                    .expectedKeyPoints(List.of(
+                            "Incident command protocol and stakeholder communications",
+                            "Systematic diagnostic methodology (logs, metrics, recent deployments)",
+                            "Preventative engineering action items added to sprint backlog"
+                    ))
+                    .followUpQuestions(List.of(
+                            "How did you manage executive updates while keeping engineers focused on mitigation?",
+                            "What automated testing gaps were exposed by this incident?"
+                    ))
+                    .build());
+        }
 
         return questions;
     }

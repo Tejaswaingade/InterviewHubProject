@@ -18,7 +18,7 @@ public class ResetPasswordRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    @Schema(description = "User's registered email address", example = "waingadetejas@gmail.com")
+    @Schema(description = "User's registered email address", example = "interviewhub21@gmail.com")
     private String email;
 
     @NotBlank(message = "Reset code is required")

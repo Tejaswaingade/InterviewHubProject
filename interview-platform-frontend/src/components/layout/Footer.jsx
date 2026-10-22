@@ -170,6 +170,16 @@ export function Footer() {
               >
                 Community Standards
               </button>
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=interviewhub21@gmail.com&su=Customer%20Support%20-%20InterviewHub&body=Hello%20InterviewHub%20Support,%0A%0AI%20have%20a%20query%20regarding:%0A"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link-btn"
+                id="footer-link-customer-support"
+                title="Customer Support (Redirects to Google Mail)"
+              >
+                Customer Support ↗
+              </a>
             </div>
           </div>
 
@@ -204,8 +214,28 @@ export function Footer() {
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Interview Hub. connect.prep.grow</p>
           <div className="footer-bottom-links">
+            <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=interviewhub21@gmail.com&su=InterviewHub%20Support%20Query&body=Hello%20InterviewHub%20Support%20Team,%0A%0AMy%20question/query:%0A"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link-btn"
+              id="footer-link-mail-support"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                color: 'var(--brand-primary)',
+                fontWeight: 600,
+              }}
+              title="Reach out or type any query to customer support via Google Mail"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span>interviewhub21@gmail.com</span>
+            </a>
             <button
               type="button"
               onClick={() => setActiveModal('privacy')}

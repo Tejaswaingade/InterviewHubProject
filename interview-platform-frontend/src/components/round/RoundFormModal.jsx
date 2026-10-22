@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export const ROUND_TYPES = [
   { value: 'ONLINE_ASSESSMENT', label: 'Online Assessment' },
@@ -36,9 +37,10 @@ export function RoundFormModal({
   const [apiError, setApiError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Reset or populate form when modal opens or initialValues change
+  // Body overflow lock & reset form when modal opens
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden'
       if (initialValues) {
         setFormData({
           roundNumber: initialValues.roundNumber || defaultNextRoundNumber,
@@ -58,6 +60,11 @@ export function RoundFormModal({
       }
       setFieldErrors({})
       setApiError(null)
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
     }
   }, [isOpen, initialValues, defaultNextRoundNumber])
 
@@ -127,38 +134,51 @@ export function RoundFormModal({
     }
   }
 
-  return (
-    <div
-      id="round-form-modal-overlay"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '1rem',
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !isSubmitting) onClose()
-      }}
-    >
+    if (!isOpen) return null
+
+    const modalNode = (
       <div
-        className="card"
-        id="round-form-modal"
+        id="round-form-modal-overlay"
         style={{
-          maxWidth: '560px',
-          width: '100%',
-          padding: '2rem',
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-card)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-xl)',
-          maxHeight: '90vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(5, 10, 20, 0.78)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '1.5rem',
+          boxSizing: 'border-box',
           overflowY: 'auto',
         }}
+        onClick={(e) => {
+          if (e.target.id === 'round-form-modal-overlay' && !isSubmitting) onClose()
+        }}
       >
+        <div
+          className="card"
+          id="round-form-modal"
+          style={{
+            maxWidth: '560px',
+            width: '100%',
+            padding: '2rem',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-xl)',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            margin: 'auto',
+            position: 'relative',
+          }}
+        >
         {/* Modal Header */}
         <div
           style={{
@@ -463,6 +483,11 @@ export function RoundFormModal({
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalNode, document.body)
+  }
+  return modalNode
 }
 
 export default RoundFormModal

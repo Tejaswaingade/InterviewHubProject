@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export const QUESTION_TYPES = [
   { value: 'DSA', label: 'DSA' },
@@ -38,9 +39,10 @@ export function QuestionFormModal({
   const [apiError, setApiError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Populate or reset form whenever modal opens or initialValues changes
+  // Body overflow lock & populate or reset form
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden'
       if (initialValues) {
         setFormData({
           questionText: initialValues.questionText || initialValues.title || '',
@@ -60,6 +62,11 @@ export function QuestionFormModal({
       }
       setFieldErrors({})
       setApiError(null)
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
     }
   }, [isOpen, initialValues])
 
@@ -126,21 +133,32 @@ export function QuestionFormModal({
     }
   }
 
-  return (
+  if (!isOpen) return null
+
+  const modalNode = (
     <div
       id="question-form-modal-overlay"
       style={{
         position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(5, 10, 20, 0.78)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1100,
-        padding: '1rem',
+        zIndex: 99999,
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        overflowY: 'auto',
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget && !isSubmitting) onClose()
+        if (e.target.id === 'question-form-modal-overlay' && !isSubmitting) onClose()
       }}
     >
       <div
@@ -156,6 +174,8 @@ export function QuestionFormModal({
           boxShadow: 'var(--shadow-xl)',
           maxHeight: '90vh',
           overflowY: 'auto',
+          margin: 'auto',
+          position: 'relative',
         }}
       >
         {/* Header */}
@@ -461,6 +481,11 @@ export function QuestionFormModal({
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalNode, document.body)
+  }
+  return modalNode
 }
 
 export default QuestionFormModal

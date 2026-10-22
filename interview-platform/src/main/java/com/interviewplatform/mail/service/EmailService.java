@@ -27,7 +27,7 @@ public class EmailService {
     @Autowired(required = false)
     private JavaMailSender javaMailSender;
 
-    @Value("${spring.mail.username:waingadetejas@gmail.com}")
+    @Value("${spring.mail.username:interviewhub21@gmail.com}")
     private String smtpUsername;
 
     @Value("${spring.mail.password:fuwtqivjxennbnjk}")
@@ -36,7 +36,7 @@ public class EmailService {
     @Value("${mail.api-key:}")
     private String apiKey;
 
-    @Value("${mail.from-email:waingadetejas@gmail.com}")
+    @Value("${mail.from-email:interviewhub21@gmail.com}")
     private String fromEmail;
 
     @Value("${mail.from-name:InterviewHub}")
@@ -149,7 +149,7 @@ public class EmailService {
     private void sendViaSmtp(String toEmail, String recipientName, String subject, String htmlContent) throws Exception {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        String senderEmail = (smtpUsername != null && !smtpUsername.isBlank()) ? smtpUsername.trim() : "waingadetejas@gmail.com";
+        String senderEmail = (smtpUsername != null && !smtpUsername.isBlank()) ? smtpUsername.trim() : "interviewhub21@gmail.com";
         helper.setFrom(new InternetAddress(senderEmail, fromName != null ? fromName : "InterviewHub"));
         helper.setTo(toEmail.trim());
         helper.setSubject(subject);
@@ -187,7 +187,7 @@ public class EmailService {
     private void sendViaBrevo(String toEmail, String recipientName, String subject, String htmlContent) throws Exception {
         String escapedHtml = escapeJson(htmlContent);
         String escapedSubject = escapeJson(subject);
-        String senderEmail = (smtpUsername != null && !smtpUsername.isBlank()) ? smtpUsername.trim() : "waingadetejas@gmail.com";
+        String senderEmail = (smtpUsername != null && !smtpUsername.isBlank()) ? smtpUsername.trim() : "interviewhub21@gmail.com";
 
         String jsonPayload = String.format(
                 "{\"sender\":{\"name\":\"%s\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\",\"name\":\"%s\"}],\"subject\":\"%s\",\"htmlContent\":\"%s\"}",
@@ -211,7 +211,7 @@ public class EmailService {
     private void sendViaSendGrid(String toEmail, String subject, String htmlContent) throws Exception {
         String escapedHtml = escapeJson(htmlContent);
         String escapedSubject = escapeJson(subject);
-        String senderEmail = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail.trim() : "waingadetejas@gmail.com";
+        String senderEmail = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail.trim() : "interviewhub21@gmail.com";
 
         String jsonPayload = String.format(
                 "{\"personalizations\":[{\"to\":[{\"email\":\"%s\"}]}],\"from\":{\"email\":\"%s\",\"name\":\"%s\"},\"subject\":\"%s\",\"content\":[{\"type\":\"text/html\",\"value\":\"%s\"}]}",

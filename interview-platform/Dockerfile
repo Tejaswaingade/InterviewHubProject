@@ -1,38 +1,35 @@
 # ==============================================================================
-# Multi-Stage Production Dockerfile for Interview Platform Backend
+# Stage 1: Build JAR with Maven & OpenJDK 17
 # ==============================================================================
+FROM maven:3.9.6-eclipse-temurin-17-alpine AS builder
 
-# Stage 1: Build the application with Maven & Temurin JDK 21
-FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
+WORKDIR /build
 
-WORKDIR /app
-
-# Copy pom.xml and pre-download dependencies for efficient layer caching
+# Cache Maven dependencies layer
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build production artifact
+# Copy source code and build production executable JAR
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
-# Stage 2: Minimal, secure JRE 21 runtime container
-FROM eclipse-temurin:21-jre-alpine
+# ==============================================================================
+# Stage 2: Minimal Production JRE Runtime
+# ==============================================================================
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Create and switch to non-root user for security best practices
+# Add unprivileged system user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser:appgroup
 
-# Copy built JAR artifact from builder stage
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder --chown=appuser:appgroup /build/target/*.jar app.jar
 
-# Expose application port
+USER appuser
+
 EXPOSE 8080
 
-# Container JVM and profile defaults
 ENV SPRING_PROFILES_ACTIVE=prod \
-    JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+    JAVA_TOOL_OPTIONS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
 
-# Run Spring Boot application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

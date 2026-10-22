@@ -2150,7 +2150,7 @@ img, svg, canvas, video {
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -2165,8 +2165,7 @@ img, svg, canvas, video {
 .auth-container,
 #login-page,
 #register-page {
-  animation: soothingPageEnter 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: opacity, transform;
+  animation: soothingPageEnter 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes soothingTabSwitch {
@@ -2266,7 +2265,7 @@ div[id$="-modal"],
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -2282,8 +2281,7 @@ div[id$="-modal"],
 #login-page,
 #register-page,
 .auth-grid-layout {
-  animation: dribbbleFadeSlide 0.48s cubic-bezier(0.22, 1, 0.36, 1) both !important;
-  will-change: opacity, transform;
+  animation: dribbbleFadeSlide 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Smooth Relaxed Click & Press Interactions */
@@ -2301,26 +2299,71 @@ a.nav-link,
               color 0.22s ease !important;
 }
 
-/* Global active transform removed */
-
 /* Relaxed Modal Pop */
 @keyframes dribbbleModalPop {
   0% {
     opacity: 0;
-    transform: scale(0.93) translateY(14px);
+    transform: scale(0.95);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
 #signout-confirm-modal,
 #delete-confirm-modal,
 div[id$="-modal"],
-.card[id$="-modal"] {
-  animation: dribbbleModalPop 0.42s cubic-bezier(0.22, 1, 0.36, 1) both !important;
-  will-change: opacity, transform;
+.card[id$="-modal"],
+#round-form-modal,
+#question-form-modal,
+#question-edit-modal,
+#company-modal {
+  animation: dribbbleModalPop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Universal Viewport-Centered Modal & Overlay Enforcement */
+div[id$="-overlay"],
+.modal-overlay,
+#delete-confirm-modal-overlay,
+#delete-question-modal-overlay,
+#delete-round-modal-overlay,
+#delete-experience-modal-overlay,
+#signout-confirm-modal-overlay,
+#round-form-modal-overlay,
+#question-form-modal-overlay,
+#question-edit-modal-overlay,
+#company-form-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  padding: 1.5rem !important;
+}
+
+div[id$="-modal"],
+.card[id$="-modal"],
+#round-form-modal,
+#question-form-modal,
+#question-edit-modal,
+#company-modal,
+#delete-confirm-modal,
+#signout-confirm-modal {
+  position: relative !important;
+  margin: auto !important;
+  z-index: 1000000 !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
 }
 \n/* ==========================================================================
    GOOGLE LUXURY & TRENDING DRIBBBLE ANIMATION SUITE (UNIQUE & INTERESTING)

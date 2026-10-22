@@ -30,7 +30,7 @@ vi.mock('../api/questionApi', () => ({
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
-    user: { id: 5, name: 'Tejas', email: 'waingadetejas@gmail.com', role: 'USER' },
+    user: { id: 5, name: 'Tejas', email: 'interviewhub21@gmail.com', role: 'USER' },
     isAdmin: false,
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,

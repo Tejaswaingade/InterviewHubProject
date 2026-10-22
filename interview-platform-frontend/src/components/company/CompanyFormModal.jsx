@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import companyApi from '../../api/companyApi'
 import { resolveCompanyLogoOnline } from '../../utils/companyBrands'
 
@@ -15,21 +16,29 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (company && isEditing) {
-      setFormData({
-        name: company.name || '',
-        website: company.website || '',
-        description: company.description || '',
-      })
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+      if (company && isEditing) {
+        setFormData({
+          name: company.name || '',
+          website: company.website || '',
+          description: company.description || '',
+        })
+      } else {
+        setFormData({
+          name: '',
+          website: '',
+          description: '',
+        })
+      }
+      setFieldErrors({})
+      setApiError(null)
     } else {
-      setFormData({
-        name: '',
-        website: '',
-        description: '',
-      })
+      document.body.style.overflow = ''
     }
-    setFieldErrors({})
-    setApiError(null)
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [company, isEditing, isOpen])
 
   if (!isOpen) return null
@@ -98,23 +107,30 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
     }
   }
 
-  return (
+  const modalNode = (
     <div
       className="modal-overlay"
       style={{
         position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.55)',
-        backdropFilter: 'blur(6px)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(5, 10, 20, 0.78)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1050,
-        padding: '1.25rem',
-        animation: 'fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        zIndex: 99999,
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        overflowY: 'auto',
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget && !isSubmitting) onClose()
+        if (e.target.id === 'company-form-modal-overlay' && !isSubmitting) onClose()
       }}
       id="company-form-modal-overlay"
     >
@@ -130,7 +146,8 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
           boxShadow: 'var(--shadow-xl)',
           maxHeight: '90vh',
           overflowY: 'auto',
-          animation: 'modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+          margin: 'auto',
+          position: 'relative',
         }}
       >
         <div
@@ -383,6 +400,11 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalNode, document.body)
+  }
+  return modalNode
 }
 
 export default CompanyFormModal

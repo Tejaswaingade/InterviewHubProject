@@ -6,6 +6,7 @@ import ExperienceForm from '../components/experience/ExperienceForm'
 import Loading from '../components/common/Loading'
 import ErrorMessage from '../components/common/ErrorMessage'
 import EmptyState from '../components/common/EmptyState'
+import DeleteConfirmModal from '../components/common/DeleteConfirmModal'
 
 export function EditExperience() {
   const { id } = useParams()
@@ -198,117 +199,23 @@ export function EditExperience() {
       {/* Pre-filled Experience Form in Edit Mode */}
       <ExperienceForm initialValues={experience} isEditing={true} />
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div
-          id="delete-experience-modal-overlay"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1100,
-            padding: '1rem',
-          }}
-        >
-          <div
-            className="card"
-            id="delete-experience-modal"
-            style={{
-              maxWidth: '480px',
-              width: '100%',
-              padding: '2rem',
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-card)',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-xl)',
-            }}
-          >
-            <div style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '1rem' }}>⚠️</div>
-
-            <h3
-              style={{
-                fontSize: '1.4rem',
-                fontWeight: 800,
-                textAlign: 'center',
-                color: 'var(--text-primary)',
-                marginBottom: '0.75rem',
-              }}
-              id="delete-modal-title"
-            >
-              Delete Interview Experience?
-            </h3>
-
-            <p
-              style={{
-                color: 'var(--text-secondary)',
-                fontSize: '0.95rem',
-                lineHeight: 1.6,
-                textAlign: 'center',
-                marginBottom: '1.5rem',
-              }}
-              id="delete-modal-description"
-            >
-              Are you sure you want to delete{' '}
-              <strong style={{ color: 'var(--text-primary)' }}>"{experience.experienceTitle}"</strong>?
-              This will permanently remove the experience narrative, its interview rounds, and all recorded
-              interview questions.
-            </p>
-
-            {deleteError && (
-              <div
-                style={{
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid var(--brand-danger, #ef4444)',
-                  color: 'var(--brand-danger, #ef4444)',
-                  fontSize: '0.875rem',
-                  marginBottom: '1.25rem',
-                }}
-                id="delete-error-message"
-              >
-                {deleteError}
-              </div>
-            )}
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.85rem',
-                flexWrap: 'wrap',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(false)}
-                disabled={isDeleting}
-                className="btn btn-secondary"
-                id="btn-cancel-delete"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="btn btn-primary"
-                id="btn-confirm-delete"
-                style={{
-                  backgroundColor: 'var(--brand-danger, #ef4444)',
-                  borderColor: 'var(--brand-danger, #ef4444)',
-                }}
-              >
-                {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Standardized Viewport-Centered Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Interview Experience?"
+        message="Are you sure you want to permanently delete this interview experience? This will remove all rounds and recorded questions."
+        itemName={experience?.experienceTitle || 'Experience'}
+        isDeleting={isDeleting}
+        error={deleteError}
+        confirmButtonText="Yes"
+        cancelButtonText="No"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteModal(false)
+          setDeleteError(null)
+        }}
+        id="delete-experience-modal"
+      />
     </div>
   )
 }

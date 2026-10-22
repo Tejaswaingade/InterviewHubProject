@@ -34,17 +34,69 @@ export function MockInterview() {
 
   const activeQuestion = questions[currentIdx] || null
 
+  // Real-time draft answer persistence to localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('interviewhub_mock_answers')
+      if (saved) {
+        setAnswers(JSON.parse(saved))
+      }
+    } catch (e) {
+      console.warn('Could not read cached mock answers:', e)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (Object.keys(answers).length > 0) {
+      try {
+        localStorage.setItem('interviewhub_mock_answers', JSON.stringify(answers))
+      } catch (e) {
+        console.warn('Could not cache mock answers:', e)
+      }
+    }
+  }, [answers])
+
   useEffect(() => {
     let interval = null
     if (timerActive && timeLeft !== null && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false)
+            return 0
+          }
+          return prev - 1
+        })
       }, 1000)
     }
     return () => {
       if (interval) clearInterval(interval)
     }
   }, [timerActive, timeLeft])
+
+  const handleAddTime = (extraSeconds) => {
+    setTimeLeft((prev) => (prev || 0) + extraSeconds)
+    setTimerActive(true)
+  }
+
+  const handleResetTimer = () => {
+    if (activeQuestion) {
+      setTimeLeft(activeQuestion.timeLimitSeconds || 600)
+      setTimerActive(true)
+    }
+  }
+
+  const handleRetakeRound = () => {
+    if (activeQuestion) {
+      setTimeLeft(activeQuestion.timeLimitSeconds || 600)
+      setTimerActive(true)
+      setEvaluations((prev) => {
+        const next = { ...prev }
+        delete next[activeQuestion.id]
+        return next
+      })
+    }
+  }
 
   const handleGenerateQuestions = async (e) => {
     if (e) e.preventDefault()
@@ -60,13 +112,19 @@ export function MockInterview() {
         domain,
         difficulty,
         candidateProfileSummary: candidateNotes,
+        resumeSnippet: candidateNotes,
       })
       const qList = res.data?.data || res.data || []
-      setQuestions(qList)
+      setQuestions([...qList])
+      setCurrentIdx(0)
       if (qList.length > 0) {
         setTimeLeft(qList[0].timeLimitSeconds || 600)
         setTimerActive(true)
       }
+      setTimeout(() => {
+        const el = document.getElementById('mock-active-question')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
     } catch (err) {
       console.error('Failed to generate mock interview questions:', err)
       setErrorMsg(err.response?.data?.message || 'Could not connect to AI Mock Interviewer service. Please try again.')
@@ -375,37 +433,72 @@ export function MockInterview() {
                 </span>
               </div>
 
-              {/* Countdown Timer */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontFamily: "'JetBrains Mono', Consolas, monospace",
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  color: timeLeft !== null && timeLeft < 120 ? '#ef4444' : 'var(--text-primary)',
-                  backgroundColor: 'var(--bg-secondary)',
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-medium)',
-                }}
-              >
-                <span>⏱️</span>
-                <span>{formatTimer(timeLeft)}</span>
+              {/* Countdown Timer & Clean Visible Controls */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <div
+                  id="mock-timer-display"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontFamily: "'JetBrains Mono', Consolas, monospace",
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    color: timeLeft === 0 ? '#ef4444' : timeLeft !== null && timeLeft < 120 ? '#ef4444' : 'var(--text-primary)',
+                    backgroundColor: timeLeft === 0 ? 'rgba(239, 68, 68, 0.12)' : 'var(--bg-secondary)',
+                    padding: '0.45rem 0.95rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: timeLeft === 0 ? '1px solid #ef4444' : '1px solid var(--border-medium)',
+                    letterSpacing: '0.04em',
+                  }}
+                  title={timeLeft === 0 ? "Time's Up!" : timerActive ? 'Timer running' : 'Timer paused'}
+                >
+                  <span>{formatTimer(timeLeft)}</span>
+                  {timeLeft === 0 && (
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time's Up</span>
+                  )}
+                  {!timerActive && timeLeft > 0 && (
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', backgroundColor: 'rgba(245, 158, 11, 0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px' }}>Paused</span>
+                  )}
+                </div>
+
+                {/* Clearly Visible Pause / Resume Button */}
                 <button
                   type="button"
+                  id="mock-timer-toggle-btn"
                   onClick={() => setTimerActive((prev) => !prev)}
+                  className="btn btn-sm btn-secondary"
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    marginLeft: '0.25rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0.45rem 1rem',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    minWidth: '95px',
+                    backgroundColor: !timerActive && timeLeft > 0 ? '#f59e0b' : undefined,
+                    borderColor: !timerActive && timeLeft > 0 ? '#f59e0b' : undefined,
+                    color: !timerActive && timeLeft > 0 ? '#ffffff' : undefined,
                   }}
+                  title={timerActive ? 'Pause the interview countdown' : 'Resume interview timer'}
                 >
-                  {timerActive ? '⏸️' : '▶️'}
+                  {timerActive ? 'Pause' : 'Resume'}
+                </button>
+
+                {/* Clearly Visible Reset Timer Button (No emoji) */}
+                <button
+                  type="button"
+                  id="mock-timer-reset-btn"
+                  onClick={handleResetTimer}
+                  className="btn btn-sm btn-secondary"
+                  style={{
+                    padding: '0.45rem 1rem',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                  }}
+                  title="Reset timer to original question limit"
+                >
+                  Reset Timer
                 </button>
               </div>
             </div>
@@ -480,6 +573,62 @@ export function MockInterview() {
               border: '1px solid var(--border-medium)',
             }}
           >
+            {/* Time's Up Real-time Alert Banner with 1-click Action Options */}
+            {timeLeft === 0 && (
+              <div
+                id="mock-times-up-banner"
+                style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1rem 1.25rem',
+                  marginBottom: '1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#ef4444', fontWeight: 800, fontSize: '0.95rem' }}>
+                    <span>⏰</span>
+                    <span>Time's Up for Round {currentIdx + 1}!</span>
+                  </div>
+                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Your allocated time for this question has expired. You can submit now for instant AI evaluation, add extra time (+5m) to continue writing, or retake this round with a fresh timer.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleEvaluateCurrent}
+                    disabled={isEvaluating || !currentAnswer.trim()}
+                    className="btn btn-sm btn-primary"
+                    id="times-up-submit-btn"
+                  >
+                    📊 Submit for Scoring
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddTime(300)}
+                    className="btn btn-sm btn-secondary"
+                    id="times-up-extend-btn"
+                  >
+                    ⏳ +5 Mins
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRetakeRound}
+                    className="btn btn-sm btn-ghost"
+                    id="times-up-retake-btn"
+                  >
+                    🔄 Retake Round
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
                 Your Answer:

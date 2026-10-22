@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import questionApi from '../../api/questionApi'
 
 const QUESTION_TYPES = [
@@ -26,6 +27,7 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
 
   useEffect(() => {
     if (question && isOpen) {
+      document.body.style.overflow = 'hidden'
       setFormData({
         questionText: question.questionText || '',
         questionType: question.questionType || 'DSA',
@@ -35,6 +37,11 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
       })
       setFieldErrors({})
       setApiError(null)
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
     }
   }, [question, isOpen])
 
@@ -87,18 +94,32 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
     }
   }
 
-  return (
+  if (!isOpen) return null
+
+  const modalNode = (
     <div
       id="question-edit-modal-overlay"
       style={{
         position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(5, 10, 20, 0.78)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1100,
-        padding: '1rem',
+        zIndex: 99999,
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        overflowY: 'auto',
+      }}
+      onClick={(e) => {
+        if (e.target.id === 'question-edit-modal-overlay' && !isSubmitting) onClose()
       }}
     >
       <div
@@ -114,6 +135,8 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
           boxShadow: 'var(--shadow-xl)',
           maxHeight: '90vh',
           overflowY: 'auto',
+          margin: 'auto',
+          position: 'relative',
         }}
       >
         <div
@@ -357,6 +380,11 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalNode, document.body)
+  }
+  return modalNode
 }
 
 export default QuestionEditModal

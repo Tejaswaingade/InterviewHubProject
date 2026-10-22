@@ -264,7 +264,7 @@ class InterviewExperienceServiceTest {
     }
 
     @Test
-    @DisplayName("Delete experience - Unauthorized user: Throws AccessDeniedException")
+    @DisplayName("Delete experience - Unauthorized user: Throws Acc essDeniedException")
     void delete_unauthorized_throwsAccessDenied() {
         when(experienceRepository.findById(100L)).thenReturn(Optional.of(experience));
 
