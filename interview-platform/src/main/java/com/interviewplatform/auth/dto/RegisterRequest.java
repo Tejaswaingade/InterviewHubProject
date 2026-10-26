@@ -3,6 +3,7 @@ package com.interviewplatform.auth.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,7 @@ public class RegisterRequest {
     @Schema(description = "Password (min 8 characters)", example = "password123")
     private String password;
 
+    @Pattern(regexp = "^$|^\\+?[0-9\\s\\-()]{7,20}$", message = "Phone number must be a valid format (7-20 digits)")
     @Schema(description = "Mobile/Phone number of the candidate", example = "+91 9876543210")
     private String phoneNumber;
 }

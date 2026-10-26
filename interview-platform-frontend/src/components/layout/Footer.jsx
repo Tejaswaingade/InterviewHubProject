@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext'
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import SignoutConfirmModal from '../common/SignoutConfirmModal'
 
 export function Footer() {
   const { isAuthenticated, user, logout } = useAuth()
@@ -11,13 +12,17 @@ export function Footer() {
   const footerLogo = theme === 'dark' ? logoDark : logoLight
   const navigate = useNavigate()
   const [activeModal, setActiveModal] = useState(null)
+  const [showSignoutModal, setShowSignoutModal] = useState(false)
 
   // Handle escape key to close modal
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setActiveModal(null)
+      if (e.key === 'Escape') {
+        setActiveModal(null)
+        setShowSignoutModal(false)
+      }
     }
-    if (activeModal) {
+    if (activeModal || showSignoutModal) {
       window.addEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'hidden'
     } else {
@@ -27,11 +32,16 @@ export function Footer() {
       window.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'unset'
     }
-  }, [activeModal])
+  }, [activeModal, showSignoutModal])
 
-  const handleSignOut = () => {
+  const handleSignOutConfirm = () => {
+    setShowSignoutModal(false)
     logout()
     navigate('/login')
+  }
+
+  const handleSignOutClick = () => {
+    setShowSignoutModal(true)
   }
 
   // Modal content dictionary
@@ -195,7 +205,7 @@ export function Footer() {
                   <Link to="/dashboard" id="footer-link-dashboard">Candidate Dashboard</Link>
                   <button
                     type="button"
-                    onClick={handleSignOut}
+                    onClick={handleSignOutClick}
                     className="footer-link-btn"
                     id="footer-btn-signout"
                   >
@@ -362,6 +372,15 @@ export function Footer() {
           </div>
         </div>
       )}
+
+      {/* Sign Out Confirmation Dialogue Box */}
+      <SignoutConfirmModal
+        isOpen={showSignoutModal}
+        userName={user?.name}
+        onConfirm={handleSignOutConfirm}
+        onCancel={() => setShowSignoutModal(false)}
+        id="footer-signout-confirm-modal"
+      />
     </footer>
   )
 }

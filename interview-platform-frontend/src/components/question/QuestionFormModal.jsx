@@ -269,7 +269,7 @@ export function QuestionFormModal({
             <textarea
               id="input-question-text"
               rows={3}
-              placeholder="e.g. How does HashMap resolve collisions? Implement LRU cache..."
+              placeholder="Problem statement or question details..."
               value={formData.questionText}
               onChange={(e) => handleChange('questionText', e.target.value)}
               disabled={isSubmitting}
@@ -410,7 +410,7 @@ export function QuestionFormModal({
             <input
               id="input-question-topic"
               type="text"
-              placeholder="e.g. Binary Trees, Concurrency, Sharding, Behavioral..."
+              placeholder="Binary Trees, Concurrency, Sharding..."
               value={formData.topic}
               onChange={(e) => handleChange('topic', e.target.value)}
               disabled={isSubmitting}

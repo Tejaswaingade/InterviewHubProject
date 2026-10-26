@@ -342,7 +342,7 @@ export function AdminDashboard() {
             </span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: 0 }}>
-            Welcome, <strong>{user?.name || 'Administrator'}</strong> ({user?.email || 'admin@example.com'}). Manage hiring organizations, candidate submissions, question banks, and audit telemetry.
+            Welcome, <strong>{user?.name || 'Administrator'}</strong>{user?.email ? ` (${user.email})` : ''}. Manage hiring organizations, candidate submissions, question banks, and audit telemetry.
           </p>
         </div>
 

@@ -31,4 +31,7 @@ public class MockInterviewRequest {
 
     @Schema(description = "Optional resume summary or key skills snippet for personalized questions", example = "Expert in React 19, Spring Boot, Postgres, Redis, Microservices")
     private String resumeSnippet;
+
+    @Schema(description = "Optional candidate focus areas or summary", example = "Distributed caching, system design, concurrency")
+    private String candidateProfileSummary;
 }

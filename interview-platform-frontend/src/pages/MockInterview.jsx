@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { mockInterviewApi } from '../api'
 
 const POPULAR_ROLES = [
@@ -27,6 +26,7 @@ export function MockInterview() {
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [showHints, setShowHints] = useState({})
   const [errorMsg, setErrorMsg] = useState(null)
+  const [successToast, setSuccessToast] = useState(null)
 
   // Countdown timer per question
   const [timeLeft, setTimeLeft] = useState(null)
@@ -107,6 +107,12 @@ export function MockInterview() {
     setCurrentIdx(0)
 
     try {
+      localStorage.removeItem('interviewhub_mock_answers')
+    } catch (e) {
+      console.warn('Could not clear cached answers:', e)
+    }
+
+    try {
       const res = await mockInterviewApi.generateQuestions({
         role,
         domain,
@@ -120,6 +126,8 @@ export function MockInterview() {
       if (qList.length > 0) {
         setTimeLeft(qList[0].timeLimitSeconds || 600)
         setTimerActive(true)
+        setSuccessToast(`✓ Generated 4 new ${difficulty} interview questions tailored for ${role}!`)
+        setTimeout(() => setSuccessToast(null), 4500)
       }
       setTimeout(() => {
         const el = document.getElementById('mock-active-question')
@@ -300,7 +308,7 @@ export function MockInterview() {
                 id="mock-role-input"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                placeholder="e.g. Senior Backend Engineer"
+                placeholder="Senior Backend Engineer"
                 required
               />
             </div>
@@ -315,7 +323,7 @@ export function MockInterview() {
                 id="mock-domain-input"
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
-                placeholder="e.g. Distributed Systems, Spring Boot, React"
+                placeholder="Distributed Systems, Spring Boot, React"
                 required
               />
             </div>
@@ -347,7 +355,7 @@ export function MockInterview() {
               rows={2}
               value={candidateNotes}
               onChange={(e) => setCandidateNotes(e.target.value)}
-              placeholder="e.g. Distributed caching, system design, concurrency, indexing..."
+              placeholder="Distributed caching, system design, concurrency, indexing..."
             />
           </div>
 
@@ -389,6 +397,28 @@ export function MockInterview() {
         >
           <span>⚠️</span>
           <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {successToast && (
+        <div
+          className="alert alert-success"
+          id="mock-success-toast"
+          style={{
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid #10b981',
+            color: '#10b981',
+            padding: '0.75rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 700,
+          }}
+        >
+          <span>🎯</span>
+          <span>{successToast}</span>
         </div>
       )}
 
@@ -596,7 +626,7 @@ export function MockInterview() {
                     <span>Time's Up for Round {currentIdx + 1}!</span>
                   </div>
                   <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    Your allocated time for this question has expired. You can submit now for instant AI evaluation, add extra time (+5m) to continue writing, or retake this round with a fresh timer.
+                    Time limit reached. Submit for scoring, add 5 minutes, or retake the round.
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

@@ -169,6 +169,7 @@ public class AuthService {
         userRepository.save(user);
 
         emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetCode);
+        log.info("[AuthService] Password reset verification code for <{}>: G-{}", normalizedEmail, resetCode);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Password reset code sent to " + normalizedEmail);

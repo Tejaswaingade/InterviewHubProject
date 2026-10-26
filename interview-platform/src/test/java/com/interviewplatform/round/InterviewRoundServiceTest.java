@@ -45,7 +45,6 @@ class InterviewRoundServiceTest {
     private InterviewRoundService roundService;
 
     private User owner;
-    private User otherUser;
     private InterviewExperience experience;
     private InterviewRound round1;
     private InterviewRound round2;
@@ -56,13 +55,6 @@ class InterviewRoundServiceTest {
                 .id(1L)
                 .name("Alice")
                 .email("alice@example.com")
-                .role(Role.USER)
-                .build();
-
-        otherUser = User.builder()
-                .id(2L)
-                .name("Bob")
-                .email("bob@example.com")
                 .role(Role.USER)
                 .build();
 

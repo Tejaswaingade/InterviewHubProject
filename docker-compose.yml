@@ -44,7 +44,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-9vB7kQ2wX4zL8mP1rT5yU3oI6aE0sD9fG2hJ5kL8nQ1wE4rT7yU0iO3pA6sD9fG}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:80}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-interviewhub21@gmail.com}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-fuwtqivjxennbnjk}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
     ports:
       - "8080:8080"
 

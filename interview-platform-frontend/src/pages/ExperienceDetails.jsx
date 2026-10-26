@@ -14,6 +14,7 @@ import QuestionFormModal from '../components/question/QuestionFormModal'
 import Loading from '../components/common/Loading'
 import ErrorMessage from '../components/common/ErrorMessage'
 import EmptyState from '../components/common/EmptyState'
+import { formatCompensation } from '../utils/formatters'
 
 
 function extractCodeSolution(text) {
@@ -655,7 +656,7 @@ export function ExperienceDetails() {
                 Total Annual Compensation
               </div>
               <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#10b981', marginTop: '0.25rem' }}>
-                {experience.currency || '$'}{Number(experience.totalCompensation || 0).toLocaleString()}
+                {formatCompensation(experience.totalCompensation, experience.currency)}
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginLeft: '0.25rem' }}>/ yr</span>
               </div>
             </div>
@@ -666,7 +667,7 @@ export function ExperienceDetails() {
                   Base Salary
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {experience.currency || '$'}{Number(experience.baseSalary).toLocaleString()}
+                  {formatCompensation(experience.baseSalary, experience.currency)}
                 </div>
               </div>
             )}
@@ -677,7 +678,7 @@ export function ExperienceDetails() {
                   Stock / Equity Grant
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0284c7', marginTop: '0.25rem' }}>
-                  {experience.currency || '$'}{Number(experience.stockGrant).toLocaleString()}
+                  {formatCompensation(experience.stockGrant, experience.currency)}
                 </div>
               </div>
             )}
@@ -688,7 +689,7 @@ export function ExperienceDetails() {
                   Signing / Relocation Bonus
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#f59e0b', marginTop: '0.25rem' }}>
-                  {experience.currency || '$'}{Number(experience.signingBonus).toLocaleString()}
+                  {formatCompensation(experience.signingBonus, experience.currency)}
                 </div>
               </div>
             )}

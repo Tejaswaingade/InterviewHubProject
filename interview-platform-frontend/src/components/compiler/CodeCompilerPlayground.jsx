@@ -633,7 +633,7 @@ export function CodeCompilerPlayground({
             onChange={(e) => setStdinInput(e.target.value)}
             id="compiler-stdin-input"
             rows={2}
-            placeholder="Enter custom input values (e.g. 5\n1 2 3 4 5)..."
+            placeholder="Enter custom input values..."
             style={{
               width: '100%',
               padding: '0.5rem 0.75rem',
@@ -991,7 +991,7 @@ export function CodeCompilerPlayground({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <input
                   type="text"
-                  placeholder="Invocation (e.g. twoSum([1,2,3], 5))"
+                  placeholder="Invocation (twoSum([1,2,3], 5))"
                   value={newTcExpression}
                   onChange={(e) => setNewTcExpression(e.target.value)}
                   className="form-control"
@@ -999,7 +999,7 @@ export function CodeCompilerPlayground({
                 />
                 <input
                   type="text"
-                  placeholder="Expected Return (e.g. [1, 2])"
+                  placeholder="Expected Return ([1, 2])"
                   value={newTcExpected}
                   onChange={(e) => setNewTcExpected(e.target.value)}
                   className="form-control"
@@ -1010,6 +1010,65 @@ export function CodeCompilerPlayground({
                 Save Assertion
               </button>
             </form>
+          )}
+
+          {testResults && (
+            <div
+              id="compiler-test-summary-banner"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                backgroundColor: testResults.passedCount === testResults.totalCount ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                border: `1px solid ${testResults.passedCount === testResults.totalCount ? '#10b981' : '#ef4444'}`,
+                marginBottom: '1rem',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.25rem' }}>{testResults.passedCount === testResults.totalCount ? '🎉' : '⚠️'}</span>
+                <div>
+                  <strong style={{ color: testResults.passedCount === testResults.totalCount ? '#10b981' : '#ef4444', fontSize: '0.9rem', display: 'block' }}>
+                    {testResults.passedCount === testResults.totalCount ? 'All Test Cases Passed!' : 'Test Assertions Failed'}
+                  </strong>
+                  <span style={{ fontSize: '0.75rem', color: themeColors.textMuted }}>
+                    {testResults.passedCount} of {testResults.totalCount} test assertions passed successfully
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span
+                  id="test-cases-passed-count-badge"
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#10b981',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  ✓ {testResults.passedCount} Passed
+                </span>
+                <span
+                  id="test-cases-failed-count-badge"
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    color: '#ef4444',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  ✕ {testResults.totalCount - testResults.passedCount} Failed
+                </span>
+              </div>
+            </div>
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

@@ -457,7 +457,7 @@ export function Profile() {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem' }}>
               <p style={{ fontSize: '1.02rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }} id="profile-email">
-                {profile?.email || 'candidate@example.com'}
+                {profile?.email || authUser?.email || ''}
               </p>
               <button
                 type="button"
@@ -505,7 +505,7 @@ export function Profile() {
                   id="profile-phone-input"
                   value={editedPhone}
                   onChange={(e) => setEditedPhone(e.target.value)}
-                  placeholder="e.g. +91 98765 43210"
+                  placeholder="+91 98765 43210"
                   className="form-control"
                   style={{
                     maxWidth: '220px',

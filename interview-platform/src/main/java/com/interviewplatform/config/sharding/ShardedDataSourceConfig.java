@@ -34,23 +34,23 @@ public class ShardedDataSourceConfig {
     private String driverClassName;
 
     // Optional Shard 1 configurations with fallback to primary
-    @Value("${spring.datasource.shard1.url:#{null}}")
+    @Value("${sharding.datasource.shard1.url:${spring.datasource.shard1.url:#{null}}}")
     private String shard1Url;
 
-    @Value("${spring.datasource.shard1.username:#{null}}")
+    @Value("${sharding.datasource.shard1.username:${spring.datasource.shard1.username:#{null}}}")
     private String shard1Username;
 
-    @Value("${spring.datasource.shard1.password:#{null}}")
+    @Value("${sharding.datasource.shard1.password:${spring.datasource.shard1.password:#{null}}}")
     private String shard1Password;
 
     // Optional Shard 2 configurations with fallback to primary
-    @Value("${spring.datasource.shard2.url:#{null}}")
+    @Value("${sharding.datasource.shard2.url:${spring.datasource.shard2.url:#{null}}}")
     private String shard2Url;
 
-    @Value("${spring.datasource.shard2.username:#{null}}")
+    @Value("${sharding.datasource.shard2.username:${spring.datasource.shard2.username:#{null}}}")
     private String shard2Username;
 
-    @Value("${spring.datasource.shard2.password:#{null}}")
+    @Value("${sharding.datasource.shard2.password:${spring.datasource.shard2.password:#{null}}}")
     private String shard2Password;
 
     private HikariDataSource createDataSource(String poolName, String url, String username, String password) {

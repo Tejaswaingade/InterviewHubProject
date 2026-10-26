@@ -313,7 +313,7 @@ export function QuestionEditModal({ isOpen, onClose, question = null, onSuccess 
               <input
                 id="input-edit-q-topic"
                 type="text"
-                placeholder="e.g. Dynamic Programming"
+                placeholder="Dynamic Programming"
                 value={formData.topic}
                 onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
                 disabled={isSubmitting}

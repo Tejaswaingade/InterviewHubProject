@@ -1,5 +1,6 @@
 package com.interviewplatform.mail.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class EmailService {
     @Value("${spring.mail.username:interviewhub21@gmail.com}")
     private String smtpUsername;
 
-    @Value("${spring.mail.password:fuwtqivjxennbnjk}")
+    @Value("${spring.mail.password:}")
     private String smtpPassword;
 
     @Value("${mail.api-key:}")
@@ -51,6 +53,19 @@ public class EmailService {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(6))
                 .build();
+    }
+
+    @PostConstruct
+    public void init() {
+        if (javaMailSender instanceof JavaMailSenderImpl mailSenderImpl) {
+            if (smtpPassword != null && !smtpPassword.isBlank()) {
+                // Ensure App Passwords with display spaces are cleanly stripped of whitespace
+                mailSenderImpl.setPassword(smtpPassword.replaceAll("\\s+", "").trim());
+            }
+            if (smtpUsername != null && !smtpUsername.isBlank()) {
+                mailSenderImpl.setUsername(smtpUsername.trim());
+            }
+        }
     }
 
     /**

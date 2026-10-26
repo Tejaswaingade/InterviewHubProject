@@ -51,10 +51,21 @@ public class UserController {
     )
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(
             @Parameter(description = "Unique ID of the user", example = "1", required = true)
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
         UserResponse response = userService.getUserById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Privacy protection: Only return the candidate's phone number to themselves or ADMIN
+        boolean isOwner = authentication != null && authentication.getName().equalsIgnoreCase(response.getEmail());
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isOwner && !isAdmin) {
+            response.setPhoneNumber(null);
+        }
+
         return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", response));
     }
 

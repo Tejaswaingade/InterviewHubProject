@@ -9,7 +9,10 @@ spring:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:tejas@2707}
     driver-class-name: org.postgresql.Driver
-    # Horizontal Database Sharding Configuration (Multi-Cluster / Sharded Nodes)
+
+# Horizontal Database Sharding Configuration (Multi-Cluster / Sharded Nodes)
+sharding:
+  datasource:
     shard1:
       url: ${DB_SHARD1_URL:${spring.datasource.url}}
       username: ${DB_SHARD1_USERNAME:${spring.datasource.username}}

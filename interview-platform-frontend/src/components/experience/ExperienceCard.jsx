@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import CompanyLogo from '../common/CompanyLogo'
 import bookmarkApi from '../../api/bookmarkApi'
 import { isAuthenticated } from '../../utils/storage'
+import { formatCompensation } from '../../utils/formatters'
 
 export function ExperienceCard({ experience, showActions = false, onDelete }) {
   const [isBookmarked, setIsBookmarked] = useState(false)
@@ -179,10 +180,10 @@ export function ExperienceCard({ experience, showActions = false, onDelete }) {
               gap: '0.25rem',
             }}
             id={`exp-compensation-${experience.id}`}
-            title={`Base: ${experience.currency || '$'}${Number(experience.baseSalary || 0).toLocaleString()} | Stock: ${experience.currency || '$'}${Number(experience.stockGrant || 0).toLocaleString()} | Bonus: ${experience.currency || '$'}${Number(experience.signingBonus || 0).toLocaleString()}`}
+            title={`Base: ${formatCompensation(experience.baseSalary, experience.currency)} | Stock: ${formatCompensation(experience.stockGrant, experience.currency)} | Bonus: ${formatCompensation(experience.signingBonus, experience.currency)}`}
           >
             <span>💰</span>
-            <span>{experience.currency || '$'}{Number(experience.totalCompensation).toLocaleString()} / yr</span>
+            <span>{formatCompensation(experience.totalCompensation, experience.currency)} / yr</span>
             {experience.jobLevel && <span style={{ opacity: 0.85 }}>({experience.jobLevel})</span>}
           </span>
         )}

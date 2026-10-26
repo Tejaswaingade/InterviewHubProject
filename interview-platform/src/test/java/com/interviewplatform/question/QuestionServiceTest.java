@@ -47,7 +47,6 @@ class QuestionServiceTest {
     private QuestionService questionService;
 
     private User owner;
-    private User otherUser;
     private InterviewExperience experience;
     private InterviewRound round;
     private Question question1;
@@ -59,13 +58,6 @@ class QuestionServiceTest {
                 .id(1L)
                 .name("Alice")
                 .email("alice@example.com")
-                .role(Role.USER)
-                .build();
-
-        otherUser = User.builder()
-                .id(2L)
-                .name("Bob")
-                .email("bob@example.com")
                 .role(Role.USER)
                 .build();
 

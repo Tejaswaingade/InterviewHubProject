@@ -10,21 +10,15 @@ spring:
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:465}
     protocol: smtps
-    username: ${SPRING_MAIL_USERNAME:${MAIL_USERNAME:interviewhub21@gmail.com}}
-    password: ${SPRING_MAIL_PASSWORD:${MAIL_PASSWORD:fuwtqivjxennbnjk}}
+    username: interviewhub21@gmail.com
+    password: ${SPRING_MAIL_PASSWORD:krfqqkjtmmmqpkgg}
     properties:
       mail:
-        transport:
-          protocol: smtps
         smtp:
           auth: true
           ssl:
             enable: true
             required: true
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
-            fallback: false
           connectiontimeout: 10000
           timeout: 10000
           writetimeout: 10000
@@ -36,6 +30,8 @@ management:
       exposure:
         include: health,info
       base-path: /actuator
+
+      
   endpoint:
     health:
       probes:
@@ -68,5 +64,5 @@ cors:
 # Email Notification Service Configuration (Resend, SendGrid, Brevo, or Gmail SMTP)
 mail:
   api-key: ${MAIL_API_KEY:}
-  from-email: ${MAIL_FROM:onboarding@resend.dev}
+  from-email: ${MAIL_FROM:interviewhub21@gmail.com}
   from-name: ${MAIL_FROM_NAME:InterviewHub}

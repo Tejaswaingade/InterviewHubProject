@@ -55,7 +55,7 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
     if (formData.website && formData.website.trim()) {
       const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z0-9-]+(:[0-9]+)?(\/.*)?$/
       if (!urlPattern.test(formData.website.trim())) {
-        errors.website = 'Please enter a valid website URL (e.g. https://company.com)'
+        errors.website = 'Please enter a valid website URL'
       }
     }
 
@@ -234,7 +234,7 @@ export function CompanyFormModal({ isOpen, onClose, company = null, onSuccess })
             <input
               id="input-modal-company-name"
               type="text"
-              placeholder="e.g. Google, Stripe, Microsoft, OpenAI"
+              placeholder="Company name"
               value={formData.name}
               onChange={(e) => {
                 setFormData({ ...formData, name: e.target.value })

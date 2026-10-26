@@ -636,7 +636,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
             <input
               id="input-job-role"
               type="text"
-              placeholder="e.g. Senior Software Engineer"
+              placeholder="Senior Software Engineer"
               value={formData.jobRole}
               onChange={(e) => handleChange('jobRole', e.target.value)}
               className="wizard-input"
@@ -681,7 +681,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
             <input
               id="input-title"
               type="text"
-              placeholder="e.g. Google L5 Senior SWE Loop - Distributed Systems & Concurrency"
+              placeholder="Title of interview loop"
               value={formData.experienceTitle}
               onChange={(e) => handleChange('experienceTitle', e.target.value)}
               className="wizard-input"
@@ -699,7 +699,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
               type="number"
               min="0"
               max="40"
-              placeholder="e.g. 4"
+              placeholder="4"
               value={formData.yearsOfExperience}
               onChange={(e) => handleChange('yearsOfExperience', e.target.value)}
               className="wizard-input"
@@ -853,7 +853,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                 </button>
                 <button
                   type="button"
-                  onClick={() => insertMarkdown(descriptionRef, 'description', '\n**Example 1:**\n- Input: \n- Output: \n- Explanation: \n')}
+                  onClick={() => insertMarkdown(descriptionRef, 'description', '\n**Test Case:**\n- Input: \n- Output: \n') }
                   className="markdown-tool-btn"
                   title="Test Case"
                 >
@@ -912,7 +912,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
 
             <input
               type="text"
-              placeholder="Problem statement or question (e.g. Find median of two sorted arrays)"
+              placeholder="Problem statement or question"
               value={newQuestionText}
               onChange={(e) => setNewQuestionText(e.target.value)}
               className="wizard-input"
@@ -950,7 +950,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                 <label className="wizard-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Topic</label>
                 <input
                   type="text"
-                  placeholder="e.g. Dynamic Programming"
+                  placeholder="Dynamic Programming"
                   value={newQuestionTopic}
                   onChange={(e) => setNewQuestionTopic(e.target.value)}
                   className="wizard-input"
@@ -1192,7 +1192,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   type="text"
                   id="input-salary-level"
                   className="wizard-input"
-                  placeholder="e.g. L4 / SDE II / Senior / IC5"
+                  placeholder="L4 / SDE II / Senior"
                   value={formData.jobLevel}
                   onChange={(e) => handleChange('jobLevel', e.target.value)}
                 />
@@ -1206,7 +1206,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   type="number"
                   id="input-base-salary"
                   className="wizard-input"
-                  placeholder="e.g. 150000"
+                  placeholder="150000"
                   value={formData.baseSalary}
                   onChange={(e) => handleChange('baseSalary', e.target.value)}
                 />
@@ -1220,7 +1220,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   type="number"
                   id="input-stock-grant"
                   className="wizard-input"
-                  placeholder="e.g. 40000"
+                  placeholder="40000"
                   value={formData.stockGrant}
                   onChange={(e) => handleChange('stockGrant', e.target.value)}
                 />
@@ -1234,7 +1234,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
                   type="number"
                   id="input-signing-bonus"
                   className="wizard-input"
-                  placeholder="e.g. 20000"
+                  placeholder="20000"
                   value={formData.signingBonus}
                   onChange={(e) => handleChange('signingBonus', e.target.value)}
                 />
@@ -1277,7 +1277,7 @@ export function ExperienceForm({ initialValues = {}, isEditing = false, onSucces
             <textarea
               id="input-tips"
               rows={4}
-              placeholder="What topics should future candidates focus on? (e.g. NeetCode 150, Designing Data-Intensive Applications, system design mocks, behavioral stories...)"
+              placeholder="Key preparation topics and focus areas for candidates"
               value={formData.preparationTips}
               onChange={(e) => handleChange('preparationTips', e.target.value)}
               className="wizard-textarea"

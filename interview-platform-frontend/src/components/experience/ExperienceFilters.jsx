@@ -259,7 +259,7 @@ export function ExperienceFilters({
           <input
             id="filter-role-input"
             type="text"
-            placeholder="e.g. Backend, Software..."
+            placeholder="Search job role..."
             value={localJobRole}
             onChange={handleRoleInput}
             className="form-control"

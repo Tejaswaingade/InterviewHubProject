@@ -54,7 +54,6 @@ class InterviewExperienceServiceTest {
     private InterviewExperienceService experienceService;
 
     private User owner;
-    private User otherUser;
     private Company company;
     private Company newCompany;
     private InterviewExperience experience;
@@ -65,14 +64,6 @@ class InterviewExperienceServiceTest {
                 .id(1L)
                 .name("Alice")
                 .email("alice@example.com")
-                .role(Role.USER)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        otherUser = User.builder()
-                .id(2L)
-                .name("Bob")
-                .email("bob@example.com")
                 .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -277,6 +268,7 @@ class InterviewExperienceServiceTest {
 
     @Test
     @DisplayName("GetAll - Supports filtering and pagination")
+    @SuppressWarnings("unchecked")
     void getAll_withFilters_returnsPage() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<InterviewExperience> mockPage = new PageImpl<>(List.of(experience), pageable, 1);
@@ -292,6 +284,7 @@ class InterviewExperienceServiceTest {
 
     @Test
     @DisplayName("Search - By keyword with pagination")
+    @SuppressWarnings("unchecked")
     void search_withKeyword_returnsPage() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<InterviewExperience> mockPage = new PageImpl<>(List.of(experience), pageable, 1);

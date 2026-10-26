@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { bookmarkApi } from '../api'
 import CompanyLogo from '../components/common/CompanyLogo'
 import { isAuthenticated } from '../utils/storage'
+import { formatCompensation } from '../utils/formatters'
 
 const STATUS_TABS = [
   { key: 'ALL', label: 'All Saved', icon: '📋' },
@@ -340,7 +341,7 @@ export function PrepRoadmap() {
                               border: '1px solid rgba(16, 185, 129, 0.25)',
                             }}
                           >
-                            💰 {exp.currency || '$'}{Number(exp.totalCompensation).toLocaleString()}
+                            💰 {formatCompensation(exp.totalCompensation, exp.currency)}
                           </span>
                         )}
                       </div>

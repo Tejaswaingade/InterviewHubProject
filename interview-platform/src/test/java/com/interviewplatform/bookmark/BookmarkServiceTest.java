@@ -1,6 +1,5 @@
 package com.interviewplatform.bookmark;
 
-import com.interviewplatform.bookmark.dto.BookmarkRequest;
 import com.interviewplatform.bookmark.dto.BookmarkResponse;
 import com.interviewplatform.bookmark.entity.Bookmark;
 import com.interviewplatform.bookmark.entity.BookmarkStatus;

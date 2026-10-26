@@ -49,7 +49,7 @@ export function Register() {
         if (value && value.trim()) {
           const cleaned = value.replace(/[\s\-()]/g, '')
           if (!/^\+?[0-9]{10,15}$/.test(cleaned)) {
-            return 'Please enter a valid mobile number (10-15 digits, e.g. 9876543210 or +91 9876543210)'
+            return 'Please enter a valid 10-15 digit mobile number'
           }
         }
         return ''
@@ -184,8 +184,6 @@ export function Register() {
         <div className="auth-grid-layout">
           {/* Left Column: Platform Highlights & Community Values */}
           <div className="auth-showcase-panel">
-            <div className="auth-showcase-badge">
-            </div>
 
             <h2 className="auth-showcase-title">
               Level Up Your Career With Authentic Experiences

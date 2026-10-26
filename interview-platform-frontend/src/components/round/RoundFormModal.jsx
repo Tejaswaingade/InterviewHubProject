@@ -354,7 +354,7 @@ export function RoundFormModal({
             <input
               id="input-round-title"
               type="text"
-              placeholder="e.g. Data Structures & Algorithms, System Architecture, etc."
+              placeholder="Data Structures & Algorithms, System Architecture"
               value={formData.roundName}
               onChange={(e) => handleChange('roundName', e.target.value)}
               disabled={isSubmitting}

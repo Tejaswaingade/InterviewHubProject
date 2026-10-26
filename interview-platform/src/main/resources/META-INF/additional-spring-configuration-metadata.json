@@ -1,0 +1,69 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Base64 HMAC-SHA256 secret key for signing JWT tokens."
+    },
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.Long",
+      "description": "JWT token expiration in milliseconds (default 86400000ms = 24h)."
+    },
+    {
+      "name": "cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Allowed CORS origins for the API."
+    },
+    {
+      "name": "mail.api-key",
+      "type": "java.lang.String",
+      "description": "Optional API Key for transactional email services (Resend, SendGrid, Brevo)."
+    },
+    {
+      "name": "mail.from-email",
+      "type": "java.lang.String",
+      "description": "Sender email address for outbound emails."
+    },
+    {
+      "name": "mail.from-name",
+      "type": "java.lang.String",
+      "description": "Sender display name for outbound emails."
+    },
+    {
+      "name": "app.client-url",
+      "type": "java.lang.String",
+      "description": "Frontend client base URL for redirect links."
+    },
+    {
+      "name": "sharding.datasource.shard1.url",
+      "type": "java.lang.String",
+      "description": "JDBC URL for database shard 1."
+    },
+    {
+      "name": "sharding.datasource.shard1.username",
+      "type": "java.lang.String",
+      "description": "Username for database shard 1."
+    },
+    {
+      "name": "sharding.datasource.shard1.password",
+      "type": "java.lang.String",
+      "description": "Password for database shard 1."
+    },
+    {
+      "name": "sharding.datasource.shard2.url",
+      "type": "java.lang.String",
+      "description": "JDBC URL for database shard 2."
+    },
+    {
+      "name": "sharding.datasource.shard2.username",
+      "type": "java.lang.String",
+      "description": "Username for database shard 2."
+    },
+    {
+      "name": "sharding.datasource.shard2.password",
+      "type": "java.lang.String",
+      "description": "Password for database shard 2."
+    }
+  ]
+}

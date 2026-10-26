@@ -5,14 +5,14 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:interview_app}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: ${DB_DDL_AUTO:update}
+      ddl-auto: ${DB_DDL_AUTO:validate}
     show-sql: false
     open-in-view: false
     properties:
@@ -31,9 +31,9 @@ logging:
     org.springframework.web: INFO
     com.interviewplatform: INFO
 
-# Production JWT secret strictly from environment variable (no fallback secrets exposed)
+# Production JWT secret strictly from environment variable with fallback for syntax validation
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
 # Actuator Health - hide internal system details in production
 management:

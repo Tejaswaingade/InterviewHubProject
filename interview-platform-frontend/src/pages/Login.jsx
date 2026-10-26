@@ -45,16 +45,12 @@ export function Login() {
     }
   }, [location.state])
 
-  // When user logs in or is already authenticated, always redirect cleanly to target or /dashboard
+  // When user logs in or is already authenticated, always redirect strictly to /dashboard
   useEffect(() => {
     if (isAuthenticated && !isSubmitting) {
-      const searchParams = new URLSearchParams(location.search)
-      const redirectQuery = searchParams.get('redirect')
-      const fromPath = location.state?.from?.pathname || redirectQuery
-      const destination = (fromPath && fromPath !== '/' && fromPath !== '/login') ? fromPath : '/dashboard'
-      navigate(destination, { replace: true })
+      navigate('/dashboard', { replace: true })
     }
-  }, [isAuthenticated, isSubmitting, location.state, location.search, navigate])
+  }, [isAuthenticated, isSubmitting, navigate])
 
   const validateField = (field, value, allValues = formData) => {
     switch (field) {
@@ -71,7 +67,7 @@ export function Login() {
         const cleaned = value.trim().replace(/^G-?/i, '')
         if (!cleaned) return 'Verification code is required'
         if (cleaned.length !== 6 || !/^\d{6}$/.test(cleaned)) {
-          return 'Verification code must be 6 digits (e.g. G-123456 or 123456)'
+          return 'Verification code must be 6 digits'
         }
         return ''
       }
@@ -153,12 +149,8 @@ export function Login() {
         message: 'Successfully logged in to InterviewHub.',
       })
 
-      // Clean redirect to target or /dashboard upon login
-      const searchParams = new URLSearchParams(location.search)
-      const redirectQuery = searchParams.get('redirect')
-      const fromPath = location.state?.from?.pathname || redirectQuery
-      const destination = (fromPath && fromPath !== '/' && fromPath !== '/login') ? fromPath : '/dashboard'
-      navigate(destination, { replace: true })
+      // Strictly redirect to /dashboard upon login as required
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       console.error('[InterviewHub Login] Authentication failed:', err.message)
       const serverMessage = err.message || 'Invalid email or password. Please try again.'
@@ -299,8 +291,6 @@ export function Login() {
         <div className="auth-grid-layout">
           {/* Left Column: Platform Highlights & Trust Pillars */}
           <div className="auth-showcase-panel">
-            <div className="auth-showcase-badge">
-            </div>
 
             <h2 className="auth-showcase-title">
               Crack Top Tech Interviews With Insider Knowledge
@@ -531,12 +521,12 @@ export function Login() {
               {authMode === 'reset-confirm' && (
                 <form onSubmit={handleConfirmResetPassword} noValidate id="reset-password-confirm-form">
                   <Input
-                    label="Verification Code (Google Format)"
+                    label="Verification Code"
                     type="text"
                     name="resetToken"
                     id="reset-confirm-token"
-                    placeholder="e.g. G-482910 or 482910"
-                    helperText="Standard Google format (G-XXXXXX or 6 digits), valid for 10 minutes"
+                    placeholder="Enter 6-digit code"
+                    helperText="6-digit verification code, valid for 10 minutes"
                     value={resetData.resetToken}
                     onChange={handleResetChange}
                     error={validationErrors.resetToken}
