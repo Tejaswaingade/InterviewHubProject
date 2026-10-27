@@ -26,8 +26,7 @@ public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
-    @Autowired(required = false)
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username:interviewhub21@gmail.com}")
     private String smtpUsername;
@@ -49,7 +48,8 @@ public class EmailService {
 
     private final HttpClient httpClient;
 
-    public EmailService() {
+    public EmailService(@Autowired(required = false) JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(6))
                 .build();

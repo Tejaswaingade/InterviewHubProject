@@ -18,8 +18,14 @@ export function Input({
   const isPassword = type === 'password'
   const effectiveType = isPassword ? (showPassword ? 'text' : 'password') : type
 
+  const handleTogglePassword = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowPassword((prev) => !prev)
+  }
+
   return (
-    <div className="form-group">
+    <div className="form-group" style={{ marginBottom: '1.15rem' }}>
       {label && (
         <label htmlFor={inputId} className="form-label">
           {label} {required && <span style={{ color: 'var(--color-danger)' }}>*</span>}
@@ -36,8 +42,9 @@ export function Input({
           required={required}
           className="form-control"
           style={{
+            width: '100%',
             ...(error ? { borderColor: 'var(--color-danger)' } : {}),
-            ...(isPassword ? { paddingRight: '2.5rem' } : {}),
+            ...(isPassword ? { paddingRight: '2.75rem' } : {}),
             ...(props.style || {}),
           }}
           {...props}
@@ -45,44 +52,52 @@ export function Input({
         {isPassword && (
           <button
             type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
+            id={`${inputId}-toggle-visibility`}
+            onClick={handleTogglePassword}
+            onPointerDown={(e) => e.preventDefault()}
+            onMouseDown={(e) => e.preventDefault()}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             title={showPassword ? 'Hide password' : 'Show password'}
             style={{
               position: 'absolute',
-              right: '0.75rem',
+              right: '0.45rem',
               top: '50%',
               transform: 'translateY(-50%)',
               background: 'transparent',
               border: 'none',
-              padding: '0.2rem',
+              padding: 0,
+              width: '34px',
+              height: '34px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
+              zIndex: 10,
               color: showPassword ? 'var(--brand-primary, #3b82f6)' : 'var(--text-muted, #94a3b8)',
-              transition: 'color 0.15s ease',
+              transition: 'color 0.15s ease, transform 0.15s ease',
               lineHeight: 1,
             }}
           >
             {showPassword ? (
-              // Google Material Symbols eye-off
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+              // Eye with slash: click to hide password
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: 'none' }}>
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
               </svg>
             ) : (
-              // Google Material Symbols eye
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+              // Open Eye: click to show password
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: 'none' }}>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
               </svg>
             )}
           </button>
         )}
       </div>
       {error ? (
-        <span className="form-error">{error}</span>
+        <span className="form-error" style={{ display: 'block', marginTop: '0.25rem' }}>{error}</span>
       ) : helperText ? (
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{helperText}</span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.25rem' }}>{helperText}</span>
       ) : null}
     </div>
   )

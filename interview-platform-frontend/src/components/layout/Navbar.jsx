@@ -369,7 +369,7 @@ export function Navbar() {
 
           {/* Authentication Actions */}
           {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
               {/* User Profile Pill */}
               <Link
                 to="/profile"
@@ -387,6 +387,8 @@ export function Navbar() {
                   border: '1px solid var(--border-subtle)',
                   textDecoration: 'none',
                   boxSizing: 'border-box',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
                 id="nav-user-info"
                 title="View candidate profile"
@@ -400,13 +402,16 @@ export function Navbar() {
                       height: '22px',
                       borderRadius: '50%',
                       objectFit: 'cover',
+                      flexShrink: 0,
                     }}
                     id="nav-user-avatar-img"
                   />
                 ) : (
                   <span>👤</span>
                 )}
-                <span id="nav-user-name">{user?.name || (hasAdminRole ? 'Admin User' : 'Candidate')}</span>
+                <span id="nav-user-name" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  {user?.name || (hasAdminRole ? 'Admin User' : 'Candidate')}
+                </span>
               </Link>
 
               {/* Logout Button */}
@@ -421,6 +426,8 @@ export function Navbar() {
                   alignItems: 'center',
                   padding: '0 1rem',
                   boxSizing: 'border-box',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 Logout

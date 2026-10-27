@@ -214,7 +214,7 @@ export function Dashboard() {
             borderColor: activeTab === 'experiences' ? 'var(--brand-primary)' : 'var(--border-card)',
             boxShadow: activeTab === 'experiences' ? '0 0 16px rgba(59, 130, 246, 0.25)' : 'var(--shadow-sm)',
           }}
-          title="Click to view your experiences"
+          title=""
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
@@ -263,7 +263,7 @@ export function Dashboard() {
             borderColor: activeTab === 'rounds' ? '#8b5cf6' : 'var(--border-card)',
             boxShadow: activeTab === 'rounds' ? '0 0 16px rgba(139, 92, 246, 0.25)' : 'var(--shadow-sm)',
           }}
-          title="Click to view all interview rounds"
+          title=""
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
@@ -312,7 +312,7 @@ export function Dashboard() {
             borderColor: activeTab === 'questions' ? '#10b981' : 'var(--border-card)',
             boxShadow: activeTab === 'questions' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'var(--shadow-sm)',
           }}
-          title="Click to view all questions"
+          title=""
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>

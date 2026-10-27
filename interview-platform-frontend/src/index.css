@@ -8,8 +8,9 @@
    1. Light Theme Variables (Default)
    -------------------------------------------------------------------------- */
 :root {
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Times New Roman', Times, serif;
+  --font-serif: 'Times New Roman', Times, serif;
+  --font-mono: 'Times New Roman', Times, serif;
 
   /* Surfaces & Backgrounds */
   --bg-page: #f8fafc;
@@ -127,10 +128,66 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+html, body, button, input, select, textarea, .form-control, .btn, [data-theme],
+h1, h2, h3, h4, h5, h6, p, span, a, label, li, table, th, td, div {
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+/* Universal text readability and container containment */
+p, .exp-description, .question-text, .long-text, .markdown-content {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.card, .prep-card, .exp-card, .modal-content, [class*="card"] {
+  box-sizing: border-box;
+}
+
+/* Interactive elements, links, buttons, and badges must NEVER break vertically */
+.nav-link,
+.btn,
+.badge,
+.pill,
+.tag,
+.card-tag,
+.theme-toggle-btn,
+#nav-user-info,
+#nav-user-name,
+.auth-brand-link {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  flex-shrink: 0;
+}
+
+/* Ensure badges and tags render cleanly inline */
+.badge, .pill, .tag, .card-tag {
+  max-width: 100%;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.35;
+  flex-shrink: 0;
+}
+
+/* Textarea and form control responsive wrapping */
+.form-control, textarea, input, select {
+  max-width: 100%;
+  line-height: 1.5;
+}
+
+/* Modals should never overflow viewport horizontally or vertically */
+.modal-content, .modal-dialog {
+  max-width: 95vw;
+  box-sizing: border-box;
 }
 
 html {
-  font-family: var(--font-sans);
+  font-family: 'Times New Roman', Times, serif !important;
   background-color: var(--bg-page);
   color: var(--text-primary);
   line-height: 1.5;
@@ -526,16 +583,18 @@ p {
 
 .navbar-inner {
   height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1.25rem !important;
+  flex-wrap: nowrap !important;
 }
 
 .brand-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  flex-shrink: 0 !important;
 }
 
 .brand-logo {
@@ -546,6 +605,8 @@ p {
   font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.03em;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .brand-icon-box {
@@ -559,21 +620,30 @@ p {
   justify-content: center;
   font-size: 1.15rem;
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  flex-shrink: 0;
 }
 
 .nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .nav-link {
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 0.88rem !important;
+  font-weight: 600;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
-  padding: 0.5rem 0.25rem;
+  padding: 0.4rem 0.5rem !important;
   position: relative;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  flex-shrink: 0 !important;
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-link:hover, .nav-link.active {
@@ -592,9 +662,25 @@ p {
 }
 
 .nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+#nav-user-info {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  flex-shrink: 0 !important;
+}
+
+#nav-user-name {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  flex-shrink: 0 !important;
 }
 
 .mobile-toggle {
@@ -605,6 +691,7 @@ p {
   padding: 0.5rem;
   cursor: pointer;
   color: var(--text-primary);
+  flex-shrink: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -836,6 +923,55 @@ p {
   .container {
     max-width: 100%;
     padding: 0 1.25rem;
+  }
+}
+
+/* --- Medium Laptops & Tablets Navbar Collapse (<= 1080px) --- */
+@media (max-width: 1080px) {
+  .mobile-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .nav-menu {
+    display: none !important;
+    position: absolute;
+    top: 76px;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    flex-direction: column !important;
+    padding: 1.25rem;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    max-height: calc(100vh - 76px);
+    overflow-y: auto;
+  }
+
+  .nav-menu.open {
+    display: flex !important;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: 0.75rem 1rem !important;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    white-space: nowrap !important;
+  }
+
+  .nav-link.active::after {
+    display: none;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    background-color: var(--bg-subtle);
   }
 }
 

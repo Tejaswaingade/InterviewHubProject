@@ -6,6 +6,13 @@ spring:
     name: interview-platform
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://ep-shy-cake-b4601kfr-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_hmXgRs3NAfO5}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   mail:
     host: ${SPRING_MAIL_HOST:smtp.gmail.com}
     port: ${SPRING_MAIL_PORT:465}
@@ -66,3 +73,9 @@ mail:
   api-key: ${MAIL_API_KEY:}
   from-email: ${MAIL_FROM:interviewhub21@gmail.com}
   from-name: ${MAIL_FROM_NAME:InterviewHub}
+
+# AI Mock Interview Engine Configuration (OpenAI, Gemini, or Groq)
+ai:
+  api-key: ${AI_API_KEY:${OPENAI_API_KEY:${GEMINI_API_KEY:}}}
+  provider: ${AI_PROVIDER:auto}
+

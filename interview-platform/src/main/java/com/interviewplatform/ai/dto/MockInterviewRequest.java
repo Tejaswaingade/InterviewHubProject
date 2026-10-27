@@ -34,4 +34,7 @@ public class MockInterviewRequest {
 
     @Schema(description = "Optional candidate focus areas or summary", example = "Distributed caching, system design, concurrency")
     private String candidateProfileSummary;
+
+    @Schema(description = "Optional external AI API key (OpenAI sk-..., Groq gsk_..., Gemini AIzaSy...)", example = "sk-...")
+    private String apiKey;
 }

@@ -30,4 +30,7 @@ public class EvaluationRequest {
 
     @Schema(description = "Target difficulty", example = "HARD")
     private String difficulty;
+
+    @Schema(description = "Optional external AI API key (OpenAI sk-..., Groq gsk_..., Gemini AIzaSy...)", example = "sk-...")
+    private String apiKey;
 }

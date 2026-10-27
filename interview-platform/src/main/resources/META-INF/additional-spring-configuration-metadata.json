@@ -16,6 +16,16 @@
       "description": "Allowed CORS origins for the API."
     },
     {
+      "name": "ai.api-key",
+      "type": "java.lang.String",
+      "description": "Optional external AI API Key (OpenAI, Gemini, Groq) for real-time interview generation."
+    },
+    {
+      "name": "ai.provider",
+      "type": "java.lang.String",
+      "description": "AI provider service (openai, gemini, or auto)."
+    },
+    {
       "name": "mail.api-key",
       "type": "java.lang.String",
       "description": "Optional API Key for transactional email services (Resend, SendGrid, Brevo)."

@@ -144,13 +144,14 @@ export function ExperienceCard({ experience, showActions = false, onDelete }) {
           gap: '0.65rem',
           fontSize: '0.875rem',
           color: 'var(--text-secondary)',
-          marginBottom: '0.5rem',
+          marginBottom: '0.4rem',
           flexWrap: 'wrap',
         }}
         id={`exp-meta-${experience.id}`}
       >
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-          💼 {role}
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <span>💼</span>
+          <span>{role}</span>
         </span>
         <span style={{ color: 'var(--border-medium)' }}>•</span>
         <span
@@ -160,24 +161,34 @@ export function ExperienceCard({ experience, showActions = false, onDelete }) {
             borderRadius: 'var(--radius-sm)',
             fontSize: '0.8rem',
             fontWeight: 500,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.25rem',
+            whiteSpace: 'nowrap',
           }}
           id={`exp-years-${experience.id}`}
         >
-          ⏱️ {yearsExp}
+          <span>⏱️</span>
+          <span>{yearsExp}</span>
         </span>
-        {experience.totalCompensation && (
+      </div>
+
+      {/* Compensation Badge (if provided) */}
+      {experience.totalCompensation && (
+        <div style={{ marginBottom: '0.5rem' }}>
           <span
             style={{
               backgroundColor: 'rgba(16, 185, 129, 0.12)',
               color: '#10b981',
               border: '1px solid rgba(16, 185, 129, 0.25)',
-              padding: '0.15rem 0.5rem',
+              padding: '0.2rem 0.65rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.75rem',
+              fontSize: '0.78rem',
               fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.25rem',
+              gap: '0.35rem',
+              whiteSpace: 'nowrap',
             }}
             id={`exp-compensation-${experience.id}`}
             title={`Base: ${formatCompensation(experience.baseSalary, experience.currency)} | Stock: ${formatCompensation(experience.stockGrant, experience.currency)} | Bonus: ${formatCompensation(experience.signingBonus, experience.currency)}`}
@@ -186,8 +197,8 @@ export function ExperienceCard({ experience, showActions = false, onDelete }) {
             <span>{formatCompensation(experience.totalCompensation, experience.currency)} / yr</span>
             {experience.jobLevel && <span style={{ opacity: 0.85 }}>({experience.jobLevel})</span>}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Author & Email */}
       {experience.user && (
@@ -196,7 +207,7 @@ export function ExperienceCard({ experience, showActions = false, onDelete }) {
             display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
-            fontSize: '0.8rem',
+            fontSize: '0.82rem',
             color: 'var(--text-muted)',
             marginBottom: '0.85rem',
             flexWrap: 'wrap',

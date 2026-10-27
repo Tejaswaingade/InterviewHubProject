@@ -407,7 +407,7 @@ export function Profile() {
                     padding: '0.4rem 0.75rem',
                   }}
                 >
-                  ❌Delete Photo
+                  ❌ Delete Photo
                 </button>
               )}
             </div>

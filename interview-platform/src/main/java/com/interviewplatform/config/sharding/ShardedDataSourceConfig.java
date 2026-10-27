@@ -53,18 +53,81 @@ public class ShardedDataSourceConfig {
     @Value("${sharding.datasource.shard2.password:${spring.datasource.shard2.password:#{null}}}")
     private String shard2Password;
 
+    private static class ConnectionParams {
+        String jdbcUrl;
+        String username;
+        String password;
+
+        ConnectionParams(String jdbcUrl, String username, String password) {
+            this.jdbcUrl = jdbcUrl;
+            this.username = username;
+            this.password = password;
+        }
+    }
+
+    private ConnectionParams sanitizeConnection(String rawUrl, String defaultUser, String defaultPass) {
+        String user = defaultUser;
+        String pass = defaultPass;
+        String url = rawUrl != null ? rawUrl.trim() : "";
+
+        if (url.startsWith("postgresql://") || url.startsWith("postgres://")) {
+            int schemeEnd = url.indexOf("://");
+            String rest = url.substring(schemeEnd + 3);
+            int atIdx = rest.indexOf("@");
+            if (atIdx != -1) {
+                String creds = rest.substring(0, atIdx);
+                String hostAndDb = rest.substring(atIdx + 1);
+                int colonIdx = creds.indexOf(":");
+                if (colonIdx != -1) {
+                    user = creds.substring(0, colonIdx);
+                    pass = creds.substring(colonIdx + 1);
+                } else {
+                    user = creds;
+                }
+                url = "jdbc:postgresql://" + hostAndDb;
+            } else {
+                url = "jdbc:postgresql://" + rest;
+            }
+        } else if (url.startsWith("jdbc:postgresql://")) {
+            String rest = url.substring("jdbc:postgresql://".length());
+            int atIdx = rest.indexOf("@");
+            if (atIdx != -1) {
+                String creds = rest.substring(0, atIdx);
+                String hostAndDb = rest.substring(atIdx + 1);
+                int colonIdx = creds.indexOf(":");
+                if (colonIdx != -1) {
+                    user = creds.substring(0, colonIdx);
+                    pass = creds.substring(colonIdx + 1);
+                } else {
+                    user = creds;
+                }
+                url = "jdbc:postgresql://" + hostAndDb;
+            }
+        }
+
+        if (url != null) {
+            // Clean up any libpq parameters that standard JDBC drivers do not consume
+            url = url.replace("&channel_binding=require", "")
+                     .replace("?channel_binding=require&", "?")
+                     .replace("?channel_binding=require", "");
+        }
+
+        return new ConnectionParams(url, user, pass);
+    }
+
     private HikariDataSource createDataSource(String poolName, String url, String username, String password) {
+        ConnectionParams params = sanitizeConnection(url, username, password);
         HikariDataSource ds = new HikariDataSource();
         ds.setPoolName(poolName);
-        ds.setJdbcUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
+        ds.setJdbcUrl(params.jdbcUrl);
+        ds.setUsername(params.username);
+        ds.setPassword(params.password);
         ds.setDriverClassName(driverClassName);
         ds.setMaximumPoolSize(10);
         ds.setMinimumIdle(2);
         ds.setIdleTimeout(30000);
         ds.setConnectionTimeout(20000);
-        log.info("[ShardedDataSourceConfig] Configured connection pool [{}] -> {}", poolName, url);
+        log.info("[ShardedDataSourceConfig] Configured connection pool [{}] -> {} (user: {})", poolName, params.jdbcUrl, params.username);
         return ds;
     }
 

@@ -7,6 +7,9 @@ const POPULAR_ROLES = [
   { role: 'Staff Systems Architect', domain: 'High-Throughput & Scalability' },
   { role: 'Frontend Engineer', domain: 'Web Performance & Modern JS' },
   { role: 'DevOps & Cloud Engineer', domain: 'Kubernetes & Cloud Infrastructure' },
+  { role: 'AI / Machine Learning Engineer', domain: 'LLM Systems & Real-time Inference' },
+  { role: 'Data Engineer', domain: 'Lakehouse, Spark & Kafka Pipelines' },
+  { role: 'Mobile Engineer (Android & iOS)', domain: 'React Native & Mobile Architecture' },
 ]
 
 export function MockInterview() {
@@ -14,6 +17,14 @@ export function MockInterview() {
   const [domain, setDomain] = useState('Distributed Systems & Microservices')
   const [difficulty, setDifficulty] = useState('MEDIUM')
   const [candidateNotes, setCandidateNotes] = useState('')
+  const [apiKey, setApiKey] = useState(() => {
+    try {
+      return localStorage.getItem('interviewhub_ai_api_key') || ''
+    } catch {
+      return ''
+    }
+  })
+  const [showApiSettings, setShowApiSettings] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
   const [questions, setQuestions] = useState([])
@@ -56,6 +67,7 @@ export function MockInterview() {
     }
   }, [answers])
 
+  // Countdown timer effect
   useEffect(() => {
     let interval = null
     if (timerActive && timeLeft !== null && timeLeft > 0) {
@@ -73,6 +85,60 @@ export function MockInterview() {
       if (interval) clearInterval(interval)
     }
   }, [timerActive, timeLeft])
+
+  // Core API caller to generate questions
+  const triggerGenerate = async (targetRole, targetDomain, targetDiff, targetNotes) => {
+    const r = targetRole || role
+    const d = targetDomain || domain
+    const diff = targetDiff || difficulty
+    const notes = targetNotes !== undefined ? targetNotes : candidateNotes
+
+    setIsLoading(true)
+    setErrorMsg(null)
+    setEvaluations({})
+    setAnswers({})
+    setCurrentIdx(0)
+
+    try {
+      localStorage.removeItem('interviewhub_mock_answers')
+    } catch (e) {
+      console.warn('Could not clear cached answers:', e)
+    }
+
+    try {
+      const res = await mockInterviewApi.generateQuestions({
+        role: r,
+        domain: d,
+        difficulty: diff,
+        candidateProfileSummary: notes,
+        resumeSnippet: notes,
+        apiKey: apiKey.trim() || undefined,
+      })
+      const qList = res.data?.data || res.data || []
+      setQuestions([...qList])
+      setCurrentIdx(0)
+      if (qList.length > 0) {
+        setTimeLeft(qList[0].timeLimitSeconds || 600)
+        setTimerActive(true)
+        setSuccessToast(`✓ Generated 4 new ${diff} interview questions tailored for ${r}!`)
+        setTimeout(() => setSuccessToast(null), 4500)
+      }
+      setTimeout(() => {
+        const el = document.getElementById('mock-active-question')
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    } catch (err) {
+      console.error('Failed to generate mock interview questions:', err)
+      setErrorMsg(err.response?.data?.message || 'Could not connect to AI Mock Interviewer service. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Auto-generate default questions on initial mount
+  useEffect(() => {
+    triggerGenerate('Senior Backend Engineer', 'Distributed Systems & Microservices', 'MEDIUM', '')
+  }, [])
 
   const handleAddTime = (extraSeconds) => {
     setTimeLeft((prev) => (prev || 0) + extraSeconds)
@@ -98,52 +164,24 @@ export function MockInterview() {
     }
   }
 
-  const handleGenerateQuestions = async (e) => {
+  const handleGenerateQuestions = (e) => {
     if (e) e.preventDefault()
-    setIsLoading(true)
-    setErrorMsg(null)
-    setEvaluations({})
-    setAnswers({})
-    setCurrentIdx(0)
-
-    try {
-      localStorage.removeItem('interviewhub_mock_answers')
-    } catch (e) {
-      console.warn('Could not clear cached answers:', e)
-    }
-
-    try {
-      const res = await mockInterviewApi.generateQuestions({
-        role,
-        domain,
-        difficulty,
-        candidateProfileSummary: candidateNotes,
-        resumeSnippet: candidateNotes,
-      })
-      const qList = res.data?.data || res.data || []
-      setQuestions([...qList])
-      setCurrentIdx(0)
-      if (qList.length > 0) {
-        setTimeLeft(qList[0].timeLimitSeconds || 600)
-        setTimerActive(true)
-        setSuccessToast(`✓ Generated 4 new ${difficulty} interview questions tailored for ${role}!`)
-        setTimeout(() => setSuccessToast(null), 4500)
-      }
-      setTimeout(() => {
-        const el = document.getElementById('mock-active-question')
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 100)
-    } catch (err) {
-      console.error('Failed to generate mock interview questions:', err)
-      setErrorMsg(err.response?.data?.message || 'Could not connect to AI Mock Interviewer service. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
+    triggerGenerate(role, domain, difficulty, candidateNotes)
   }
 
   const handleSelectRole = (r) => {
     setRole(r.role)
     setDomain(r.domain)
+    triggerGenerate(r.role, r.domain, difficulty, candidateNotes)
+  }
+
+  const handleApiKeyChange = (val) => {
+    setApiKey(val)
+    try {
+      localStorage.setItem('interviewhub_ai_api_key', val)
+    } catch (e) {
+      console.warn('Could not save API key:', e)
+    }
   }
 
   const handleAnswerChange = (qId, val) => {
@@ -158,7 +196,7 @@ export function MockInterview() {
     if (!activeQuestion) return
     const currentAnswer = answers[activeQuestion.id] || ''
     if (!currentAnswer.trim()) {
-      alert('Please write an answer before requesting AI feedback.')
+      alert('Please write an answer before requesting AI evaluation.')
       return
     }
 
@@ -171,6 +209,7 @@ export function MockInterview() {
         category: activeQuestion.category,
         userAnswer: currentAnswer,
         role,
+        apiKey: apiKey.trim() || undefined,
       })
       const evalData = res.data?.data || res.data
       setEvaluations((prev) => ({ ...prev, [activeQuestion.id]: evalData }))
@@ -224,7 +263,7 @@ export function MockInterview() {
             borderRadius: 'var(--radius-full)',
             backgroundColor: 'rgba(99, 102, 241, 0.12)',
             color: '#6366f1',
-            fontSize: '0.85rem',
+            fontSize: '0.9rem',
             fontWeight: 700,
             marginBottom: '0.85rem',
           }}
@@ -240,7 +279,7 @@ export function MockInterview() {
             fontWeight: 800,
             color: 'var(--text-primary)',
             marginBottom: '0.75rem',
-            lineHeight: 1.2,
+            lineHeight: 1.25,
           }}
         >
           Technical Mock Interview
@@ -250,12 +289,12 @@ export function MockInterview() {
           style={{
             color: 'var(--text-secondary)',
             fontSize: '1.05rem',
-            maxWidth: '640px',
+            maxWidth: '680px',
             margin: '0 auto',
             lineHeight: 1.6,
           }}
         >
-          Practice interview questions tailored to your role. Get instant scores, detailed feedback, and model answers.
+          Practice high-yield technical and system design questions customized for your target engineering role. Get real-time feedback, rubric scoring, and Staff-level model answers.
         </p>
       </div>
 
@@ -270,11 +309,12 @@ export function MockInterview() {
           backgroundColor: 'var(--bg-card)',
         }}
       >
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.65rem' }}>
-            Popular Roles:
+        {/* Popular Roles Section */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+            Popular Roles (Click any role to load tailored questions immediately):
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
             {POPULAR_ROLES.map((r) => {
               const isSelected = role === r.role
               return (
@@ -285,8 +325,13 @@ export function MockInterview() {
                   className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-ghost'}`}
                   style={{
                     borderRadius: 'var(--radius-full)',
-                    fontSize: '0.8rem',
-                    padding: '0.35rem 0.85rem',
+                    fontSize: '0.85rem',
+                    padding: '0.4rem 0.95rem',
+                    fontWeight: isSelected ? 800 : 500,
+                    border: isSelected ? '1px solid var(--brand-primary)' : '1px solid var(--border-medium)',
+                    lineHeight: 1.35,
+                    whiteSpace: 'normal',
+                    textAlign: 'center',
                   }}
                 >
                   {r.role}
@@ -296,6 +341,7 @@ export function MockInterview() {
           </div>
         </div>
 
+        {/* Target Role & Domain Form */}
         <form onSubmit={handleGenerateQuestions}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
             <div>
@@ -310,6 +356,7 @@ export function MockInterview() {
                 onChange={(e) => setRole(e.target.value)}
                 placeholder="Senior Backend Engineer"
                 required
+                style={{ width: '100%' }}
               />
             </div>
 
@@ -325,6 +372,7 @@ export function MockInterview() {
                 onChange={(e) => setDomain(e.target.value)}
                 placeholder="Distributed Systems, Spring Boot, React"
                 required
+                style={{ width: '100%' }}
               />
             </div>
 
@@ -337,6 +385,7 @@ export function MockInterview() {
                 id="mock-difficulty-select"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
+                style={{ width: '100%' }}
               >
                 <option value="EASY">Junior (1-2 yrs)</option>
                 <option value="MEDIUM">Mid / Senior (3-5+ yrs)</option>
@@ -355,8 +404,65 @@ export function MockInterview() {
               rows={2}
               value={candidateNotes}
               onChange={(e) => setCandidateNotes(e.target.value)}
-              placeholder="Distributed caching, system design, concurrency, indexing..."
+              placeholder="E.g., Kafka partitioning, database sharding, concurrency, WebSockets..."
+              style={{ width: '100%', lineHeight: 1.5 }}
             />
+          </div>
+
+          {/* Collapsible API Provider Settings */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              type="button"
+              onClick={() => setShowApiSettings((prev) => !prev)}
+              className="btn btn-sm btn-ghost"
+              style={{
+                fontSize: '0.85rem',
+                color: 'var(--brand-primary)',
+                padding: '0.25rem 0.5rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <span>⚙️</span>
+              <span>{showApiSettings ? 'Hide API Engine Key' : 'Configure Custom API Key (OpenAI, Gemini, Groq)'}</span>
+            </button>
+
+            {showApiSettings && (
+              <div
+                style={{
+                  marginTop: '0.75rem',
+                  padding: '1rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-medium)',
+                }}
+              >
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.35rem', display: 'block' }}>
+                  External LLM API Key (Optional)
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="mock-api-key-input"
+                  value={apiKey}
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
+                  placeholder="Paste your OpenAI (sk-...), Gemini (AIza...), or Groq (gsk_...) key"
+                  style={{ width: '100%', marginBottom: '0.5rem' }}
+                />
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  {apiKey.trim() ? (
+                    <span style={{ color: '#10b981', fontWeight: 700 }}>
+                      ✓ Custom API key active. Questions will be generated in real-time using live LLM models.
+                    </span>
+                  ) : (
+                    <span>
+                      ℹ️ Built-in rotating question bank active. Rotating library guarantees diverse, non-repeating questions on every click.
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', alignItems: 'center' }}>
@@ -436,7 +542,7 @@ export function MockInterview() {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                 <span
                   style={{
                     backgroundColor: 'rgba(99, 102, 241, 0.15)',
@@ -451,19 +557,19 @@ export function MockInterview() {
                 </span>
                 <span
                   className={`badge badge-${activeQuestion.category.toLowerCase()}`}
-                  style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem' }}
+                  style={{ fontSize: '0.8rem', padding: '0.25rem 0.65rem', lineHeight: 1.35 }}
                 >
                   {activeQuestion.category.replace('_', ' ')}
                 </span>
                 <span
                   className={`badge badge-${difficulty.toLowerCase()}`}
-                  style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem' }}
+                  style={{ fontSize: '0.8rem', padding: '0.25rem 0.65rem', lineHeight: 1.35 }}
                 >
                   {difficulty}
                 </span>
               </div>
 
-              {/* Countdown Timer & Clean Visible Controls */}
+              {/* Countdown Timer & Controls */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                 <div
                   id="mock-timer-display"
@@ -471,7 +577,6 @@ export function MockInterview() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    fontFamily: "'JetBrains Mono', Consolas, monospace",
                     fontSize: '1.05rem',
                     fontWeight: 800,
                     color: timeLeft === 0 ? '#ef4444' : timeLeft !== null && timeLeft < 120 ? '#ef4444' : 'var(--text-primary)',
@@ -492,7 +597,7 @@ export function MockInterview() {
                   )}
                 </div>
 
-                {/* Clearly Visible Pause / Resume Button */}
+                {/* Pause / Resume Button */}
                 <button
                   type="button"
                   id="mock-timer-toggle-btn"
@@ -515,7 +620,7 @@ export function MockInterview() {
                   {timerActive ? 'Pause' : 'Resume'}
                 </button>
 
-                {/* Clearly Visible Reset Timer Button (No emoji) */}
+                {/* Reset Timer Button */}
                 <button
                   type="button"
                   id="mock-timer-reset-btn"
@@ -542,6 +647,7 @@ export function MockInterview() {
                 color: 'var(--text-primary)',
                 lineHeight: 1.5,
                 marginBottom: '1rem',
+                wordBreak: 'break-word',
               }}
             >
               {activeQuestion.question}
@@ -555,7 +661,7 @@ export function MockInterview() {
                 className="btn btn-sm btn-ghost"
                 id="mock-toggle-hints-btn"
                 style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.85rem',
                   color: 'var(--brand-primary)',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -566,7 +672,7 @@ export function MockInterview() {
                 <span>{showHints[activeQuestion.id] ? 'Hide Hints' : 'View Hints'}</span>
               </button>
 
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 Suggested: 100-250 words with trade-offs
               </div>
             </div>
@@ -665,7 +771,7 @@ export function MockInterview() {
               </span>
               <span
                 style={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.85rem',
                   fontWeight: 600,
                   color: wordCount >= 50 ? '#10b981' : 'var(--text-secondary)',
                 }}
@@ -682,11 +788,11 @@ export function MockInterview() {
               onChange={(e) => handleAnswerChange(activeQuestion.id, e.target.value)}
               placeholder="Write your answer, design details, trade-offs, and edge cases here..."
               style={{
-                fontFamily: "'Inter', sans-serif",
                 fontSize: '0.95rem',
                 lineHeight: 1.6,
                 padding: '1rem',
                 marginBottom: '1rem',
+                width: '100%',
               }}
             />
 
@@ -870,10 +976,11 @@ export function MockInterview() {
                   padding: '1rem',
                   backgroundColor: 'var(--bg-secondary)',
                   borderRadius: 'var(--radius-md)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.95rem',
                   lineHeight: 1.6,
                   color: 'var(--text-primary)',
                   marginBottom: '1.25rem',
+                  wordBreak: 'break-word',
                 }}
               >
                 <strong>Summary:</strong> {activeEvaluation.summary}
@@ -882,10 +989,10 @@ export function MockInterview() {
               {/* Strengths and Weaknesses */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
                 <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#10b981', marginBottom: '0.5rem' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#10b981', marginBottom: '0.5rem' }}>
                     Strengths:
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                     {activeEvaluation.strengths?.map((s, sIdx) => (
                       <li key={sIdx}>{s}</li>
                     ))}
@@ -893,10 +1000,10 @@ export function MockInterview() {
                 </div>
 
                 <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ef4444', marginBottom: '0.5rem' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ef4444', marginBottom: '0.5rem' }}>
                     Areas to Improve:
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                     {activeEvaluation.weaknesses?.map((w, wIdx) => (
                       <li key={wIdx}>{w}</li>
                     ))}
@@ -924,11 +1031,11 @@ export function MockInterview() {
                   <pre
                     style={{
                       whiteSpace: 'pre-wrap',
-                      fontFamily: "'JetBrains Mono', Consolas, monospace",
-                      fontSize: '0.85rem',
+                      fontSize: '0.9rem',
                       lineHeight: 1.6,
                       color: 'var(--text-primary)',
                       margin: 0,
+                      wordBreak: 'break-word',
                     }}
                   >
                     {activeEvaluation.modelAnswer}
