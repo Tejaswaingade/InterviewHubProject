@@ -31,17 +31,39 @@ public class MockInterviewService {
     @Value("${ai.provider:auto}")
     private String aiProvider;
 
-    private final HttpClient httpClient;
+    private volatile HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     // Track recently served question IDs per role/domain session to guarantee non-repeating questions
     private final ConcurrentHashMap<String, Set<String>> recentQuestionHistory = new ConcurrentHashMap<>();
 
     public MockInterviewService() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(6))
-                .build();
         this.objectMapper = new ObjectMapper();
+        try {
+            this.httpClient = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(6))
+                    .build();
+        } catch (Throwable t) {
+            log.warn("[MockInterviewService] Eager HttpClient creation deferred: {}", t.getMessage());
+            this.httpClient = null;
+        }
+    }
+
+    private HttpClient getClient() {
+        if (this.httpClient == null) {
+            synchronized (this) {
+                if (this.httpClient == null) {
+                    try {
+                        this.httpClient = HttpClient.newBuilder()
+                                .connectTimeout(Duration.ofSeconds(6))
+                                .build();
+                    } catch (Throwable t) {
+                        log.error("[MockInterviewService] Failed to initialize HttpClient: {}", t.getMessage());
+                    }
+                }
+            }
+        }
+        return this.httpClient;
     }
 
     public List<MockInterviewQuestion> generateQuestions(MockInterviewRequest request) {
@@ -704,7 +726,9 @@ public class MockInterviewService {
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(geminiPayload)))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpClient client = getClient();
+            if (client == null) return null;
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 JsonNode root = objectMapper.readTree(response.body());
                 String text = root.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText();
@@ -736,7 +760,9 @@ public class MockInterviewService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        HttpClient client = getClient();
+        if (client == null) return null;
+        HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 200 && response.statusCode() < 300) {
             JsonNode root = objectMapper.readTree(response.body());
             String rawContent = root.path("choices").path(0).path("message").path("content").asText();

@@ -46,13 +46,22 @@ public class EmailService {
     @Value("${app.client-url:${CORS_CLIENT_URL:http://localhost:5173}}")
     private String clientUrl;
 
-    private final HttpClient httpClient;
+    private volatile HttpClient httpClient;
+
+    private HttpClient getClient() {
+        if (this.httpClient == null) {
+            synchronized (this) {
+                if (this.httpClient == null) {
+                    try { this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build(); } catch (Throwable t) { this.httpClient = null; }
+                }
+            }
+        }
+        return this.httpClient;
+    }
 
     public EmailService(@Autowired(required = false) JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(6))
-                .build();
+        try { this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build(); } catch (Throwable t) { this.httpClient = null; }
     }
 
     @PostConstruct
@@ -193,7 +202,7 @@ public class EmailService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
             throw new RuntimeException("Resend API error HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -217,7 +226,7 @@ public class EmailService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
             throw new RuntimeException("Brevo API error HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -241,7 +250,7 @@ public class EmailService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
             throw new RuntimeException("SendGrid API error HTTP " + response.statusCode() + ": " + response.body());
         }
