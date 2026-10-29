@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -38,7 +38,6 @@ management:
         include: health,info
       base-path: /actuator
 
-      
   endpoint:
     health:
       probes:
@@ -66,7 +65,7 @@ jwt:
 
 # CORS Configuration
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*,https://*.vercel.app}
 
 # Email Notification Service Configuration (Resend, SendGrid, Brevo, or Gmail SMTP)
 mail:
@@ -78,4 +77,3 @@ mail:
 ai:
   api-key: ${AI_API_KEY:${OPENAI_API_KEY:${GEMINI_API_KEY:}}}
   provider: ${AI_PROVIDER:auto}
-
